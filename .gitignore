@@ -60,4 +60,15 @@ Thumbs.db
 
 # uv
 .uv/
-uv.lock
+
+# MkDocs
+site/
+
+# Letta
+.letta/
+
+# MkDocs
+site/
+
+# Letta/Claude agents
+.letta/
