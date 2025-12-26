@@ -1,101 +1,124 @@
 *! fixture_bipartite_network.ado
 *! Version 1.0.0
-*! Creates a bipartite network (seller-buyer) for testing
-*! Based on Bernard & Zi (2022) elementary model structure
+*! Creates a bipartite network (two distinct node types) for testing
+*! Default structure: employer-employee (AKM-style)
 *!
 *! Syntax:
-*!   fixture_bipartite_network [, n_firms(#) n_edges(#) temporal seed(#)]
+*!   fixture_bipartite_network [, n_workers(#) n_firms(#) n_periods(#) ///
+*!                                 start_year(#) mobility(#) seed(#)]
 *!
 *! Options:
-*!   n_firms(#)  - Total number of firms (default: 100)
-*!   n_edges(#)  - Number of edges/transactions (default: 500)
-*!   temporal    - Add year dimension (2015-2019)
-*!   seed(#)     - Random seed (default: 12345)
+*!   n_workers(#)  - Number of workers (default: 500)
+*!   n_firms(#)    - Number of firms (default: 50)
+*!   n_periods(#)  - Number of time periods (default: 5)
+*!   start_year(#) - Starting year (default: 2015)
+*!   mobility(#)   - Job mobility rate 0-1 (default: 0.15)
+*!   seed(#)       - Random seed (default: 12345)
 *!
 *! Creates variables:
-*!   seller  - Seller firm ID
-*!   buyer   - Buyer firm ID  
-*!   weight  - Transaction value (log-normal)
-*!   year    - Time period (if temporal option specified)
+*!   worker_id - Worker identifier (1 to n_workers)
+*!   firm_id   - Firm identifier (1 to n_firms)
+*!   year      - Time period
+*!   wage      - Log wage (worker + firm effects + residual)
 *!
-*! Structure follows Bernard & Zi (2022):
-*!   ~31% only buyers, ~13% only sellers, ~56% both
+*! Bipartite structure:
+*!   - Two distinct node types: workers and firms
+*!   - Edges only between workers and firms (not worker-worker or firm-firm)
+*!   - Follows AKM (Abowd, Kramarz, Margolis 1999) wage decomposition
+*!   - log(wage) = worker_effect + firm_effect + X'beta + residual
 
 program define fixture_bipartite_network
     version 16
     
-    syntax [, n_firms(integer 100) n_edges(integer 500) temporal seed(integer 12345)]
+    syntax [, n_workers(integer 500) n_firms(integer 50) n_periods(integer 5) ///
+              start_year(integer 2015) mobility(real 0.15) seed(integer 12345)]
     
     clear
     set seed `seed'
     
-    // Firm composition (Bernard & Zi 2022)
-    local n_only_buyers = floor(0.31 * `n_firms')
-    local n_only_sellers = floor(0.13 * `n_firms')
-    local n_both = `n_firms' - `n_only_buyers' - `n_only_sellers'
-    
-    // Seller pool: only_sellers + both
-    local n_sellers = `n_only_sellers' + `n_both'
-    // Buyer pool: only_buyers + both  
-    local n_buyers = `n_only_buyers' + `n_both'
-    
-    // Create edges
-    if "`temporal'" != "" {
-        local n_years = 5
-        local total_edges = `n_edges' * `n_years'
-    }
-    else {
-        local total_edges = `n_edges'
+    // Validate mobility rate
+    if `mobility' < 0 | `mobility' > 1 {
+        display as error "mobility() must be between 0 and 1"
+        exit 198
     }
     
-    set obs `total_edges'
+    // Generate worker fixed effects (permanent worker ability)
+    // These capture time-invariant worker heterogeneity
+    tempfile worker_effects
+    clear
+    set obs `n_workers'
+    gen int worker_id = _n
+    gen double worker_effect = rnormal(0, 0.3)
+    save `worker_effects', replace
     
-    // Generate seller IDs (from seller pool)
-    gen int seller = ceil(runiform() * `n_sellers')
+    // Generate firm fixed effects (firm wage premium)
+    // These capture time-invariant firm pay policies
+    tempfile firm_effects
+    clear
+    set obs `n_firms'
+    gen int firm_id = _n
+    gen double firm_effect = rnormal(0, 0.2)
+    save `firm_effects', replace
     
-    // Generate buyer IDs (from buyer pool, offset by n_only_sellers)
-    gen int buyer = `n_only_sellers' + ceil(runiform() * `n_buyers')
+    // Create worker-year panel with job mobility
+    clear
+    local n_obs = `n_workers' * `n_periods'
+    set obs `n_obs'
     
-    // Ensure no self-loops (seller != buyer)
-    replace buyer = buyer + 1 if seller == buyer
-    replace buyer = `n_only_sellers' + 1 if buyer > `n_firms'
+    // Worker ID (repeated for each period)
+    gen int worker_id = mod(_n - 1, `n_workers') + 1
     
-    // Transaction weight (log-normal, mean ~0.034, following BCCR data)
-    gen double weight = exp(rnormal(-3.4, 0.5))
+    // Year
+    gen int year = `start_year' + floor((_n - 1) / `n_workers')
     
-    // Add temporal dimension if requested
-    if "`temporal'" != "" {
-        gen int year = 2015 + floor((_n - 1) / `n_edges')
-        label variable year "Transaction year"
-    }
+    // Initial firm assignment (random)
+    gen int firm_id = ceil(runiform() * `n_firms')
     
-    // Remove exact duplicates (keep unique edges per period)
-    if "`temporal'" != "" {
-        duplicates drop seller buyer year, force
-    }
-    else {
-        duplicates drop seller buyer, force
-    }
+    // Apply job mobility
+    // Workers have probability `mobility` of switching firms each year
+    sort worker_id year
+    by worker_id: replace firm_id = firm_id[_n-1] if _n > 1 & runiform() > `mobility'
+    by worker_id: replace firm_id = ceil(runiform() * `n_firms') if _n > 1 & runiform() <= `mobility'
     
-    // Labels
-    label variable seller "Seller firm ID"
-    label variable buyer "Buyer firm ID"
-    label variable weight "Transaction value"
+    // Merge worker effects
+    merge m:1 worker_id using `worker_effects', nogen keep(match)
+    
+    // Merge firm effects
+    merge m:1 firm_id using `firm_effects', nogen keep(match)
+    
+    // Generate log wages following AKM decomposition
+    // log(wage) = worker_effect + firm_effect + experience + residual
+    gen double experience = (year - `start_year') * 0.02  // 2% return to experience
+    gen double residual = rnormal(0, 0.15)
+    gen double log_wage = 10 + worker_effect + firm_effect + experience + residual
+    gen double wage = exp(log_wage)
+    
+    // Clean up intermediate variables
+    drop worker_effect firm_effect experience residual log_wage
+    
+    // Sort and label
+    sort worker_id year
+    
+    label variable worker_id "Worker identifier"
+    label variable firm_id "Firm identifier"
+    label variable year "Year"
+    label variable wage "Wage (AKM structure)"
     
     // Return info
     quietly count
-    return scalar n_edges = r(N)
+    return scalar n_obs = r(N)
+    return scalar n_workers = `n_workers'
     return scalar n_firms = `n_firms'
-    return scalar n_sellers = `n_sellers'
-    return scalar n_buyers = `n_buyers'
+    return scalar n_periods = `n_periods'
+    return scalar mobility = `mobility'
 end
 
-// Alias for production network naming
-program define fixture_production_network
+// Alias for employer-employee data
+program define fixture_employer_employee
     fixture_bipartite_network `0'
 end
 
-// Alias for trade network
-program define fixture_trade_network
+// Alias for matched data
+program define fixture_matched_panel
     fixture_bipartite_network `0'
 end
