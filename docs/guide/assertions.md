@@ -34,7 +34,7 @@ assert_true condition
 ```stata
 assert_true _N > 0
 assert_true r(mean) > 0
-assert_true inlist("`region'", "EU", "GB")
+assert_true inlist("`status'", "active", "pending", "closed")
 ```
 
 ### assert_false
