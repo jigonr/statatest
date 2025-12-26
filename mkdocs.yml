@@ -47,9 +47,15 @@ nav:
   - CI Integration:
       - GitHub Actions: ci/github-actions.md
       - Codecov: ci/codecov.md
+  - Extensions:
+      - Overview: extensions/index.md
+      - "statatest[econ]": extensions/econ.md
   - Reference:
       - CLI: reference/cli.md
       - Configuration: reference/config.md
+      - Core Assertions: reference/assertions.md
+      - Econ Assertions: reference/econ-assertions.md
+      - Econ Fixtures: reference/econ-fixtures.md
   - Migration: migration.md
 
 markdown_extensions:
