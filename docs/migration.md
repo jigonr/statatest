@@ -52,27 +52,27 @@ test_variable_exists
 display "All tests passed!"
 ```
 
-## From Perfect Match Pattern
+## From Verbose Manual Testing
 
 ### Before (30+ lines per test)
 
 ```stata
-// tests/unit/test_configure_region.do
+// tests/unit/test_config_loader.do
 local tests_run = 0
 local tests_passed = 0
 local tests_failed = 0
 local all_test_results ""
 
-// Test 1: EU region configuration
+// Test 1: Load default configuration
 local tests_run = `tests_run' + 1
-configure_region EU
+load_config "default"
 local test_pass = 1
-if "`r(region)'" != "EU" {
-    display as error "  FAIL: r(region) = `r(region)', expected EU"
+if "`r(status)'" != "success" {
+    display as error "  FAIL: r(status) = `r(status)', expected success"
     local test_pass = 0
 }
-if "`r(deflator)'" != "IIPI" {
-    display as error "  FAIL: r(deflator) = `r(deflator)', expected IIPI"
+if "`r(format)'" != "json" {
+    display as error "  FAIL: r(format) = `r(format)', expected json"
     local test_pass = 0
 }
 if `test_pass' == 1 {
@@ -89,25 +89,25 @@ else {
 ### After (3-5 lines per test)
 
 ```stata
-// tests/unit/test_configure_region.do
+// tests/unit/test_config_loader.do
 // @marker: unit
 
 clear all
 
-program define test_eu_region
-    configure_region EU
-    assert_equal "`r(region)'", expected("EU")
-    assert_equal "`r(deflator)'", expected("IIPI")
+program define test_default_config
+    load_config "default"
+    assert_equal "`r(status)'", expected("success")
+    assert_equal "`r(format)'", expected("json")
 end
 
-program define test_gb_region
-    configure_region GB
-    assert_equal "`r(region)'", expected("GB")
-    assert_equal "`r(deflator)'", expected("IIPI")
+program define test_custom_config
+    load_config "custom"
+    assert_equal "`r(status)'", expected("success")
+    assert_equal "`r(format)'", expected("yaml")
 end
 
-test_eu_region
-test_gb_region
+test_default_config
+test_custom_config
 
 display "All tests passed!"
 ```
