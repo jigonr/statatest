@@ -1,0 +1,132 @@
+"""Tests for report generation module."""
+
+from pathlib import Path
+import tempfile
+import xml.etree.ElementTree as ET
+
+import pytest
+
+from statatest.models import TestResult
+from statatest.report import write_junit_xml, generate_lcov
+
+
+@pytest.fixture
+def sample_results():
+    """Create sample test results."""
+    return [
+        TestResult(
+            test_file="tests/unit/test_foo.do",
+            passed=True,
+            duration=1.5,
+            assertions_passed=3,
+        ),
+        TestResult(
+            test_file="tests/unit/test_bar.do",
+            passed=False,
+            duration=0.8,
+            error_message="assertion is false",
+            assertions_failed=1,
+        ),
+        TestResult(
+            test_file="tests/integration/test_workflow.do",
+            passed=True,
+            duration=5.2,
+            assertions_passed=10,
+        ),
+    ]
+
+
+def test_write_junit_xml(sample_results):
+    """Test JUnit XML generation."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = Path(tmpdir) / "junit.xml"
+        write_junit_xml(sample_results, output_path)
+
+        # Parse and verify XML
+        tree = ET.parse(output_path)
+        root = tree.getroot()
+
+        assert root.tag == "testsuites"
+        assert root.get("tests") == "3"
+        assert root.get("failures") == "1"
+
+        # Check testsuites
+        testsuites = root.findall("testsuite")
+        assert len(testsuites) == 2  # unit and integration
+
+        # Find unit suite
+        unit_suite = next(ts for ts in testsuites if ts.get("name") == "unit")
+        assert unit_suite.get("tests") == "2"
+        assert unit_suite.get("failures") == "1"
+
+
+def test_write_junit_xml_failure_details(sample_results):
+    """Test that failure details are included in JUnit XML."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = Path(tmpdir) / "junit.xml"
+        write_junit_xml(sample_results, output_path)
+
+        tree = ET.parse(output_path)
+        root = tree.getroot()
+
+        # Find the failure element
+        failures = root.findall(".//failure")
+        assert len(failures) == 1
+        assert "assertion is false" in failures[0].get("message")
+
+
+def test_generate_lcov():
+    """Test LCOV coverage report generation."""
+    results = [
+        TestResult(
+            test_file="test.do",
+            passed=True,
+            duration=1.0,
+            coverage_hits={
+                "myfunction.ado": {1, 2, 3, 5, 7},
+                "other.ado": {10, 20},
+            },
+        ),
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = Path(tmpdir) / "coverage.lcov"
+        generate_lcov(results, output_path)
+
+        content = output_path.read_text()
+
+        # Check LCOV format
+        assert "TN:statatest" in content
+        assert "SF:myfunction.ado" in content
+        assert "SF:other.ado" in content
+        assert "DA:1,1" in content
+        assert "DA:2,1" in content
+        assert "end_of_record" in content
+
+
+def test_generate_lcov_aggregates_coverage():
+    """Test that coverage is aggregated across multiple test results."""
+    results = [
+        TestResult(
+            test_file="test1.do",
+            passed=True,
+            duration=1.0,
+            coverage_hits={"myfunction.ado": {1, 2, 3}},
+        ),
+        TestResult(
+            test_file="test2.do",
+            passed=True,
+            duration=1.0,
+            coverage_hits={"myfunction.ado": {3, 4, 5}},
+        ),
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = Path(tmpdir) / "coverage.lcov"
+        generate_lcov(results, output_path)
+
+        content = output_path.read_text()
+
+        # Lines 1-5 should all be covered (union of both test results)
+        for line in range(1, 6):
+            assert f"DA:{line},1" in content
