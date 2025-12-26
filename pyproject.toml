@@ -51,7 +51,16 @@ Issues = "https://github.com/jigonr/statatest/issues"
 Changelog = "https://github.com/jigonr/statatest/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/statatest", "src/stata"]
+packages = ["src/statatest"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+
+[tool.hatch.build]
+include = [
+    "src/statatest/**/*.py",
+    "src/statatest/ado/**/*.ado",
+]
 
 [tool.ruff]
 line-length = 100

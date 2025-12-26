@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.resources
 import re
 import subprocess
 import tempfile
@@ -14,6 +15,30 @@ from statatest.config import Config
 from statatest.models import TestFile, TestResult
 
 console = Console()
+
+
+def _get_assertions_path() -> Path:
+    """Get the path to the Stata assertions directory.
+
+    Uses importlib.resources to find package data, which works for both
+    development installs (editable) and installed packages.
+    """
+    # Use importlib.resources to find the package's ado files
+    try:
+        files = importlib.resources.files("statatest")
+        assertions_path = Path(str(files.joinpath("ado", "assertions")))
+        if assertions_path.exists():
+            return assertions_path
+    except (TypeError, AttributeError):
+        pass
+
+    # Fallback: look relative to this module (works in development)
+    module_dir = Path(__file__).parent
+    assertions_path = module_dir / "ado" / "assertions"
+    if assertions_path.exists():
+        return assertions_path
+
+    raise FileNotFoundError("Could not locate statatest assertion .ado files")
 
 # Pattern to extract coverage markers from SMCL logs
 # Format: {* COV:filename:lineno }
@@ -84,6 +109,21 @@ def _run_single_test(
     """
     start_time = time.time()
 
+    # Get path to assertion .ado files
+    try:
+        assertions_path = _get_assertions_path()
+    except FileNotFoundError:
+        assertions_path = None
+
+    # Create a wrapper .do file that sets up adopath and runs the test
+    wrapper_content = _create_wrapper_do(test.path, assertions_path)
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".do", delete=False
+    ) as wrapper_file:
+        wrapper_file.write(wrapper_content)
+        wrapper_path = Path(wrapper_file.name)
+
     # Use SMCL log format for coverage marker parsing
     log_suffix = ".smcl" if coverage else ".log"
 
@@ -103,7 +143,7 @@ def _run_single_test(
             log_flag,
             "-q",  # Quiet mode (suppress logo)
             "do",
-            str(test.path),
+            str(wrapper_path),
         ]
 
         process = subprocess.run(
@@ -177,11 +217,47 @@ def _run_single_test(
         )
 
     finally:
-        # Clean up log file
-        try:
-            log_path.unlink()
-        except FileNotFoundError:
-            pass
+        # Clean up temporary files
+        for path in [log_path, wrapper_path]:
+            try:
+                path.unlink()
+            except FileNotFoundError:
+                pass
+
+
+def _create_wrapper_do(test_path: Path, assertions_path: Path | None) -> str:
+    """Create a wrapper .do file that sets up adopath and runs the test.
+
+    Args:
+        test_path: Path to the test file.
+        assertions_path: Path to the assertions directory.
+
+    Returns:
+        Contents of the wrapper .do file.
+    """
+    lines = [
+        "// Auto-generated wrapper by statatest",
+        "// Sets up adopath for assertion functions",
+        "",
+        "clear all",
+        "set more off",
+        "",
+    ]
+
+    # Add assertions path to adopath if available
+    if assertions_path:
+        lines.extend([
+            f'adopath + "{assertions_path}"',
+            "",
+        ])
+
+    # Run the actual test
+    lines.extend([
+        f'do "{test_path}"',
+        "",
+    ])
+
+    return "\n".join(lines)
 
 
 def _extract_error_message(log_content: str, stderr: str) -> str:
