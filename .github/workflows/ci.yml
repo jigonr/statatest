@@ -5,6 +5,16 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Run Stata integration tests weekly on Sundays at 00:00 UTC
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+    inputs:
+      run_stata_tests:
+        description: "Run Stata integration tests"
+        required: false
+        default: "false"
+        type: boolean
 
 jobs:
   test:
@@ -63,10 +73,12 @@ jobs:
       - name: Run mypy
         run: uv run mypy src/statatest
 
-  # Integration tests with Stata (manual trigger only)
+  # Integration tests with Stata (scheduled weekly or manual trigger)
   integration:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
+    if: >
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.run_stata_tests == 'true')
     container:
       image: dataeditors/stata18:latest
       options: --user root
@@ -77,6 +89,11 @@ jobs:
       - name: Set up license
         run: |
           echo "${{ secrets.STATA_LIC_B64 }}" | base64 -d > /usr/local/stata/stata.lic
+
+      - name: Verify Stata installation
+        run: |
+          stata-mp -v
+          echo "Stata installation verified"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -89,12 +106,28 @@ jobs:
       - name: Install statatest
         run: uv pip install -e .
 
-      - name: Run Stata tests
-        run: statatest tests/ --junit-xml=junit.xml
+      - name: Run Stata assertion tests
+        run: |
+          statatest tests/stata/ \
+            --verbose \
+            --junit-xml=junit-stata.xml \
+            --coverage \
+            --cov-report=lcov
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
-          path: junit.xml
+          name: stata-test-results
+          path: |
+            junit-stata.xml
+            coverage.lcov
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        if: always()
+        with:
+          files: coverage.lcov
+          flags: stata
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
