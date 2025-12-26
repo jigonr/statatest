@@ -80,6 +80,48 @@ end
 | `assert_var_exists` | Variable exists | `assert_var_exists myvar` |
 | `assert_approx_equal` | Float comparison | `assert_approx_equal r(mean), expected(0.5) tol(0.01)` |
 
+## Fixtures
+
+Create reusable setup/teardown functions with `conftest.do`:
+
+```stata
+// tests/conftest.do - Shared fixtures
+
+program define fixture_sample_panel
+    clear
+    set obs 100
+    gen int firm_id = ceil(_n / 10)
+    gen int year = 2010 + mod(_n, 10)
+    gen double revenue = exp(rnormal(15, 2))
+end
+
+program define fixture_sample_panel_teardown
+    clear
+end
+```
+
+Use fixtures in your tests:
+
+```stata
+// tests/test_analysis.do
+// @uses_fixture: sample_panel
+
+program define test_panel_analysis
+    use_fixture sample_panel
+
+    assert_obs_count 100
+    assert_var_exists revenue
+end
+```
+
+Built-in fixtures:
+
+| Fixture | Purpose |
+|---------|---------|
+| `fixture_tempfile` | Temporary file path (`$fixture_tempfile_path`) |
+| `fixture_empty_dataset` | Empty dataset with optional obs count |
+| `fixture_seed` | Reproducible random seed |
+
 ## Configuration
 
 Create `statatest.toml` in your project root:

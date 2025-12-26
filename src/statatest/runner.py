@@ -17,28 +17,41 @@ from statatest.models import TestFile, TestResult
 console = Console()
 
 
-def _get_assertions_path() -> Path:
-    """Get the path to the Stata assertions directory.
+def _get_ado_paths() -> dict[str, Path]:
+    """Get paths to Stata .ado directories (assertions and fixtures).
 
     Uses importlib.resources to find package data, which works for both
     development installs (editable) and installed packages.
+
+    Returns:
+        Dictionary with 'assertions' and 'fixtures' paths
     """
+    paths: dict[str, Path] = {}
+
     # Use importlib.resources to find the package's ado files
     try:
         files = importlib.resources.files("statatest")
-        assertions_path = Path(str(files.joinpath("ado", "assertions")))
-        if assertions_path.exists():
-            return assertions_path
+        ado_base = Path(str(files.joinpath("ado")))
+        if ado_base.exists():
+            for subdir in ["assertions", "fixtures"]:
+                subpath = ado_base / subdir
+                if subpath.exists():
+                    paths[subdir] = subpath
+            if paths:
+                return paths
     except (TypeError, AttributeError):
         pass
 
     # Fallback: look relative to this module (works in development)
     module_dir = Path(__file__).parent
-    assertions_path = module_dir / "ado" / "assertions"
-    if assertions_path.exists():
-        return assertions_path
+    ado_base = module_dir / "ado"
+    if ado_base.exists():
+        for subdir in ["assertions", "fixtures"]:
+            subpath = ado_base / subdir
+            if subpath.exists():
+                paths[subdir] = subpath
 
-    raise FileNotFoundError("Could not locate statatest assertion .ado files")
+    return paths
 
 # Pattern to extract coverage markers from SMCL logs
 # Format: {* COV:filename:lineno }
@@ -109,14 +122,16 @@ def _run_single_test(
     """
     start_time = time.time()
 
-    # Get path to assertion .ado files
-    try:
-        assertions_path = _get_assertions_path()
-    except FileNotFoundError:
-        assertions_path = None
+    # Get paths to .ado files (assertions and fixtures)
+    ado_paths = _get_ado_paths()
+
+    # Find conftest.do files in directory hierarchy
+    from statatest.fixtures import discover_conftest
+
+    conftest_files = discover_conftest(test.path.parent)
 
     # Create a wrapper .do file that sets up adopath and runs the test
-    wrapper_content = _create_wrapper_do(test.path, assertions_path)
+    wrapper_content = _create_wrapper_do(test.path, ado_paths, conftest_files)
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".do", delete=False
@@ -225,34 +240,46 @@ def _run_single_test(
                 pass
 
 
-def _create_wrapper_do(test_path: Path, assertions_path: Path | None) -> str:
+def _create_wrapper_do(
+    test_path: Path,
+    ado_paths: dict[str, Path],
+    conftest_files: list[Path],
+) -> str:
     """Create a wrapper .do file that sets up adopath and runs the test.
 
     Args:
         test_path: Path to the test file.
-        assertions_path: Path to the assertions directory.
+        ado_paths: Dictionary of ado paths (assertions, fixtures).
+        conftest_files: List of conftest.do files to load (in order).
 
     Returns:
         Contents of the wrapper .do file.
     """
     lines = [
         "// Auto-generated wrapper by statatest",
-        "// Sets up adopath for assertion functions",
+        "// Sets up adopath for assertion and fixture functions",
         "",
         "clear all",
         "set more off",
         "",
     ]
 
-    # Add assertions path to adopath if available
-    if assertions_path:
-        lines.extend([
-            f'adopath + "{assertions_path}"',
-            "",
-        ])
+    # Add ado paths to adopath
+    for name, path in ado_paths.items():
+        lines.append(f'// Add {name} path')
+        lines.append(f'adopath + "{path}"')
+        lines.append("")
+
+    # Load conftest.do files (root first, then closer to test)
+    if conftest_files:
+        lines.append("// Load conftest.do files (fixtures and shared setup)")
+        for conftest in conftest_files:
+            lines.append(f'do "{conftest}"')
+        lines.append("")
 
     # Run the actual test
     lines.extend([
+        "// Run the test file",
         f'do "{test_path}"',
         "",
     ])

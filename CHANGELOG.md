@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Fixture system with pytest-like `conftest.do` pattern
+- Built-in fixtures:
+  - `use_fixture` - Request a fixture by name
+  - `fixture_tempfile` - Temporary file path
+  - `fixture_empty_dataset` - Empty dataset with optional observation count
+  - `fixture_seed` - Reproducible random seed
+- Fixture scoping: function, module, session
+- Automatic `conftest.do` discovery in directory hierarchy
+- Fixture example in `examples/fixtures/`
+- Python tests for fixture module (8 new tests)
+
+### Changed
+
+- Reorganized package structure: moved ado files to `statatest/ado/`
+- Improved path handling with `importlib.resources`
+
 ## [0.1.0] - 2025-12-26
 
 ### Added
