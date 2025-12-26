@@ -112,8 +112,7 @@ def generate_lcov(results: list[TestResult], output_path: Path) -> None:
         lcov_lines.append(f"SF:{filename}")
 
         # Sort lines for consistent output
-        for lineno in sorted(hit_lines):
-            lcov_lines.append(f"DA:{lineno},1")
+        lcov_lines.extend(f"DA:{lineno},1" for lineno in sorted(hit_lines))
 
         lcov_lines.append(f"LF:{len(hit_lines)}")  # Lines found (total instrumented)
         lcov_lines.append(f"LH:{len(hit_lines)}")  # Lines hit
