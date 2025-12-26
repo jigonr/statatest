@@ -18,7 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixture scoping: function, module, session
 - Automatic `conftest.do` discovery in directory hierarchy
 - Fixture example in `examples/fixtures/`
-- Python tests for fixture module (8 new tests)
+- Coverage instrumentation module (`instrument.py`)
+  - SMCL comment markers for invisible coverage tracking
+  - Automatic instrumentation to `.statatest/instrumented/` directory
+  - Line number mapping for accurate reporting
+- Enhanced coverage module with `FileCoverage` and `CoverageReport` classes
+- HTML coverage report generation
+- Pre-commit hooks for Python, Markdown, and Stata
+- Release-please for automatic changelog generation
+- Python tests for fixture and coverage modules (48 total tests)
 
 ### Changed
 
