@@ -1,0 +1,88 @@
+# Pre-commit hooks for statatest
+# See https://pre-commit.com for more information
+
+repos:
+  # Essential security and file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-ast
+
+  # Python code formatting and linting with ruff (faster than black/isort/flake8)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        name: 🐍 Lint Python code with ruff
+        args: ['--fix']
+        types_or: [python, pyi]
+        stages: [pre-commit]
+      - id: ruff-format
+        name: 🐍 Format Python code with ruff
+        types_or: [python, pyi]
+        stages: [pre-commit]
+
+  # Type checking with mypy (runs on push only)
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.14.1
+    hooks:
+      - id: mypy
+        name: 🐍 Check Python types with mypy
+        args: ['--ignore-missing-imports', '--strict']
+        additional_dependencies: ['click', 'rich']
+        files: '^src/statatest/'
+        stages: [pre-push, manual]
+
+  # Markdown formatting with prettier
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        name: 📝 Format Markdown with prettier
+        types: [markdown]
+        args: ['--prose-wrap', 'always', '--print-width', '80']
+        stages: [pre-commit]
+
+  # Markdown linting (check only, runs on push)
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.43.0
+    hooks:
+      - id: markdownlint
+        name: 📝 Lint Markdown formatting
+        args: ['--config', '.markdownlintrc']
+        stages: [pre-push, manual]
+
+  # Stata .ado file checks (custom)
+  - repo: local
+    hooks:
+      - id: stata-ado-check
+        name: 📊 Check Stata .ado files
+        entry: bash
+        args:
+          - -c
+          - |
+            # Check .ado files have version statement
+            for file in $(git diff --cached --name-only | grep '\.ado$'); do
+              if [ -f "$file" ] && ! grep -q "^version " "$file" && ! grep -q "^    version " "$file"; then
+                echo "Missing 'version' statement in $file"
+                exit 1
+              fi
+            done
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+# Global settings
+default_language_version:
+  python: python3
+
+fail_fast: false
