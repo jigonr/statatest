@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **[econ] extension** - Economic data fixtures and assertions (`pip install statatest[econ]`)
+  - Panel fixtures:
+    - `fixture_balanced_panel` - Balanced firm-year panel
+    - `fixture_unbalanced_panel` - Panel with attrition, entry, gaps
+    - `fixture_multilevel_panel` - Hierarchical panel (group × unit × year)
+  - Network fixtures:
+    - `fixture_production_network` - Sparse directed weighted network (Bernard & Zi 2022)
+    - `fixture_bipartite_network` - AKM employer-employee structure
+  - Economic assertions:
+    - `assert_unique` - ID uniqueness (uses gisid for performance)
+    - `assert_no_missing` - No missing values
+    - `assert_positive` - All values positive
+    - `assert_sorted` - Sort order preserved (uses hashsort)
+    - `assert_panel_structure` - Valid xtset with balanced option
+    - `assert_sum_equals` - Sum equals expected with by-group support
+    - `assert_identity` - Accounting identities (A + B == C)
 - Fixture system with pytest-like `conftest.do` pattern
 - Built-in fixtures:
   - `use_fixture` - Request a fixture by name
