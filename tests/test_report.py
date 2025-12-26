@@ -1,13 +1,13 @@
 """Tests for report generation module."""
 
-from pathlib import Path
 import tempfile
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import pytest
 
 from statatest.models import TestResult
-from statatest.report import write_junit_xml, generate_lcov
+from statatest.report import generate_lcov, write_junit_xml
 
 
 @pytest.fixture

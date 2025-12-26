@@ -8,4 +8,4 @@ from statatest.config import Config
 from statatest.discovery import discover_tests
 from statatest.runner import run_tests
 
-__all__ = ["Config", "discover_tests", "run_tests", "__version__"]
+__all__ = ["Config", "__version__", "discover_tests", "run_tests"]

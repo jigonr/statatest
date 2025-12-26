@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from statatest.models import TestResult
@@ -28,7 +28,7 @@ def write_junit_xml(results: list[TestResult], output_path: Path) -> None:
     testsuites.set("tests", str(len(results)))
     testsuites.set("failures", str(sum(1 for r in results if not r.passed)))
     testsuites.set("time", f"{sum(r.duration for r in results):.3f}")
-    testsuites.set("timestamp", datetime.now().isoformat())
+    testsuites.set("timestamp", datetime.now(tz=UTC).isoformat())
 
     # Group by directory (each directory is a testsuite)
     suites: dict[str, list[TestResult]] = {}
@@ -99,27 +99,27 @@ def generate_lcov(results: list[TestResult], output_path: Path) -> None:
     combined_coverage: dict[str, set[int]] = {}
 
     for result in results:
-        for filename, lines in result.coverage_hits.items():
+        for filename, hit_set in result.coverage_hits.items():
             if filename not in combined_coverage:
                 combined_coverage[filename] = set()
-            combined_coverage[filename].update(lines)
+            combined_coverage[filename].update(hit_set)
 
     # Generate LCOV content
-    lines: list[str] = []
-    lines.append("TN:statatest")
+    lcov_lines: list[str] = []
+    lcov_lines.append("TN:statatest")
 
     for filename, hit_lines in sorted(combined_coverage.items()):
-        lines.append(f"SF:{filename}")
+        lcov_lines.append(f"SF:{filename}")
 
         # Sort lines for consistent output
         for lineno in sorted(hit_lines):
-            lines.append(f"DA:{lineno},1")
+            lcov_lines.append(f"DA:{lineno},1")
 
-        lines.append(f"LF:{len(hit_lines)}")  # Lines found (total instrumented)
-        lines.append(f"LH:{len(hit_lines)}")  # Lines hit
-        lines.append("end_of_record")
+        lcov_lines.append(f"LF:{len(hit_lines)}")  # Lines found (total instrumented)
+        lcov_lines.append(f"LH:{len(hit_lines)}")  # Lines hit
+        lcov_lines.append("end_of_record")
 
-    output_path.write_text("\n".join(lines) + "\n")
+    output_path.write_text("\n".join(lcov_lines) + "\n")
 
 
 def generate_html(results: list[TestResult], output_dir: Path) -> None:

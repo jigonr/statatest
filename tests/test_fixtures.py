@@ -1,16 +1,14 @@
 """Tests for fixture module."""
 
-from pathlib import Path
 import tempfile
-
-import pytest
+from pathlib import Path
 
 from statatest.fixtures import (
     Fixture,
     FixtureManager,
     discover_conftest,
-    parse_conftest,
     get_test_fixtures,
+    parse_conftest,
 )
 from statatest.models import TestFile
 
@@ -88,7 +86,9 @@ def test_discover_conftest():
         assert len(conftest_files) == 2
         # Root comes first (use resolve() to normalize paths on macOS)
         assert conftest_files[0].resolve() == (tmppath / "conftest.do").resolve()
-        assert conftest_files[1].resolve() == (tmppath / "tests" / "conftest.do").resolve()
+        assert (
+            conftest_files[1].resolve() == (tmppath / "tests" / "conftest.do").resolve()
+        )
 
 
 def test_parse_conftest():

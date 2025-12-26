@@ -68,18 +68,108 @@ include = [
 ]
 
 [tool.ruff]
-line-length = 100
+line-length = 88
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
-ignore = ["E501"]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "SIM",    # flake8-simplify
+    "ANN",    # flake8-annotations (type hints)
+    "S",      # flake8-bandit (security)
+    "BLE",    # flake8-blind-except
+    "A",      # flake8-builtins
+    "COM",    # flake8-commas
+    "C90",    # mccabe complexity
+    "DTZ",    # flake8-datetimez
+    "EM",     # flake8-errmsg
+    "EXE",    # flake8-executable
+    "ISC",    # flake8-implicit-str-concat
+    "ICN",    # flake8-import-conventions
+    "G",      # flake8-logging-format
+    "INP",    # flake8-no-pep420
+    "PIE",    # flake8-pie
+    "T20",    # flake8-print
+    "PYI",    # flake8-pyi
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "SLF",    # flake8-self
+    "SLOT",   # flake8-slots
+    "TID",    # flake8-tidy-imports
+    "TCH",    # flake8-type-checking
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate (commented code)
+    "PGH",    # pygrep-hooks
+    "PL",     # Pylint
+    "TRY",    # tryceratops
+    "FLY",    # flynt
+    "PERF",   # Perflint
+    "FURB",   # refurb
+    "LOG",    # flake8-logging
+    "RUF",    # Ruff-specific
+]
+ignore = [
+    "COM812",   # Trailing comma missing (conflicts with formatter)
+    "ISC001",   # Implicit string concatenation (conflicts with formatter)
+    "TC001",    # Move application imports to type-checking block (too invasive)
+    "TC003",    # Move stdlib imports to type-checking block (too invasive)
+    "PLC0415",  # Allow imports inside functions (lazy loading)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",     # Allow assert in tests
+    "ARG",      # Allow unused arguments in tests
+    "PLR2004",  # Allow magic values in tests
+    "ANN",      # Skip type annotations in tests
+    "S314",     # Allow XML parsing in tests
+    "RUF059",   # Allow unpacked unused variables in tests
+    "E501",     # Allow long lines in tests
+]
+"src/statatest/cli.py" = ["PLR0913"]    # CLI has many options
+"src/statatest/runner.py" = ["S603"]    # Allow subprocess for Stata execution
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 10
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "docs"]
+skips = ["B101"]  # Allow assert in production code
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

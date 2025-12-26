@@ -19,6 +19,10 @@ from statatest.models import TestResult
 # Format: {* COV:filename:lineno }
 COVERAGE_PATTERN = re.compile(r"\{\*\s*COV:([^:]+):(\d+)\s*\}")
 
+# Coverage thresholds for HTML report styling
+COVERAGE_HIGH_THRESHOLD = 80
+COVERAGE_MEDIUM_THRESHOLD = 50
+
 
 @dataclass
 class FileCoverage:
@@ -138,8 +142,7 @@ def generate_lcov(results: list[TestResult], output_path: Path) -> None:
         lines.append(f"SF:{filename}")
 
         # Write all hit lines
-        for lineno in sorted(file_cov.lines_hit):
-            lines.append(f"DA:{lineno},1")
+        lines.extend(f"DA:{lineno},1" for lineno in sorted(file_cov.lines_hit))
 
         # Summary
         lines.append(f"LF:{len(file_cov.lines_total) or len(file_cov.lines_hit)}")
@@ -180,7 +183,7 @@ def generate_html(results: list[TestResult], output_dir: Path) -> None:
         "</style>",
         "</head>",
         "<body>",
-        f"<h1>statatest Coverage Report</h1>",
+        "<h1>statatest Coverage Report</h1>",
         f"<p>Overall coverage: <strong>{coverage.coverage_percent:.1f}%</strong></p>",
         "<table>",
         "<tr><th>File</th><th>Lines</th><th>Covered</th><th>Coverage</th></tr>",
@@ -188,7 +191,13 @@ def generate_html(results: list[TestResult], output_dir: Path) -> None:
 
     for filename, file_cov in sorted(coverage.files.items()):
         pct = file_cov.coverage_percent
-        css_class = "high" if pct >= 80 else "medium" if pct >= 50 else "low"
+        css_class = (
+            "high"
+            if pct >= COVERAGE_HIGH_THRESHOLD
+            else "medium"
+            if pct >= COVERAGE_MEDIUM_THRESHOLD
+            else "low"
+        )
         total = len(file_cov.lines_total) or len(file_cov.lines_hit)
         covered = len(file_cov.lines_hit)
         html_lines.append(
@@ -196,11 +205,13 @@ def generate_html(results: list[TestResult], output_dir: Path) -> None:
             f"<td class='{css_class}'>{pct:.1f}%</td></tr>"
         )
 
-    html_lines.extend([
-        "</table>",
-        "</body>",
-        "</html>",
-    ])
+    html_lines.extend(
+        [
+            "</table>",
+            "</body>",
+            "</html>",
+        ]
+    )
 
     index_path = output_dir / "index.html"
     index_path.write_text("\n".join(html_lines), encoding="utf-8")

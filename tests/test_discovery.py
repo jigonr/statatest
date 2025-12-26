@@ -1,12 +1,12 @@
 """Tests for test discovery module."""
 
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 import pytest
 
 from statatest.config import Config
-from statatest.discovery import discover_tests, _parse_test_file
+from statatest.discovery import _parse_test_file, discover_tests
 
 
 @pytest.fixture

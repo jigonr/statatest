@@ -112,9 +112,7 @@ def parse_conftest(conftest_path: Path) -> list[Fixture]:
     )
 
     # Collect all fixture names (including teardown)
-    all_names: list[str] = []
-    for match in fixture_pattern.finditer(content):
-        all_names.append(match.group(1))
+    all_names = [match.group(1) for match in fixture_pattern.finditer(content)]
 
     # Filter out teardown programs and create fixtures
     fixtures: list[Fixture] = []

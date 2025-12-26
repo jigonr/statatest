@@ -1,17 +1,15 @@
 """Tests for coverage collection module."""
 
-from pathlib import Path
 import tempfile
-
-import pytest
+from pathlib import Path
 
 from statatest.coverage import (
-    FileCoverage,
     CoverageReport,
-    parse_smcl_log,
+    FileCoverage,
     aggregate_coverage,
-    generate_lcov,
     generate_html,
+    generate_lcov,
+    parse_smcl_log,
 )
 from statatest.models import TestResult
 

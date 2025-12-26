@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import importlib.resources
 import re
 import subprocess
@@ -53,6 +54,7 @@ def _get_ado_paths() -> dict[str, Path]:
 
     return paths
 
+
 # Pattern to extract coverage markers from SMCL logs
 # Format: {* COV:filename:lineno }
 COVERAGE_PATTERN = re.compile(r"\{\*\s*COV:([^:]+):(\d+)\s*\}")
@@ -94,12 +96,11 @@ def run_tests(
             else:
                 console.print("[red]FAILED[/red]", end="")
             console.print(f" ({result.duration:.2f}s)")
+        # Compact output
+        elif result.passed:
+            console.print("[green].[/green]", end="")
         else:
-            # Compact output
-            if result.passed:
-                console.print("[green].[/green]", end="")
-            else:
-                console.print("[red]F[/red]", end="")
+            console.print("[red]F[/red]", end="")
 
     if not verbose:
         console.print()  # Newline after dots
@@ -163,6 +164,7 @@ def _run_single_test(
 
         process = subprocess.run(
             cmd,
+            check=False,
             capture_output=True,
             text=True,
             timeout=300,  # 5 minute timeout per test
@@ -234,10 +236,8 @@ def _run_single_test(
     finally:
         # Clean up temporary files
         for path in [log_path, wrapper_path]:
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 path.unlink()
-            except FileNotFoundError:
-                pass
 
 
 def _create_wrapper_do(
@@ -266,23 +266,24 @@ def _create_wrapper_do(
 
     # Add ado paths to adopath
     for name, path in ado_paths.items():
-        lines.append(f'// Add {name} path')
+        lines.append(f"// Add {name} path")
         lines.append(f'adopath + "{path}"')
         lines.append("")
 
     # Load conftest.do files (root first, then closer to test)
     if conftest_files:
         lines.append("// Load conftest.do files (fixtures and shared setup)")
-        for conftest in conftest_files:
-            lines.append(f'do "{conftest}"')
+        lines.extend(f'do "{conftest}"' for conftest in conftest_files)
         lines.append("")
 
     # Run the actual test
-    lines.extend([
-        "// Run the test file",
-        f'do "{test_path}"',
-        "",
-    ])
+    lines.extend(
+        [
+            "// Run the test file",
+            f'do "{test_path}"',
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 

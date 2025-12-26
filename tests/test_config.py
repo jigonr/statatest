@@ -1,9 +1,7 @@
 """Tests for configuration module."""
 
-from pathlib import Path
 import tempfile
-
-import pytest
+from pathlib import Path
 
 from statatest.config import Config, load_config
 

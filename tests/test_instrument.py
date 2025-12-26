@@ -1,17 +1,15 @@
 """Tests for source code instrumentation module."""
 
-from pathlib import Path
 import tempfile
-
-import pytest
+from pathlib import Path
 
 from statatest.instrument import (
-    should_instrument_line,
-    instrument_file,
-    instrument_directory,
-    setup_instrumented_environment,
     cleanup_instrumented_environment,
     get_total_lines,
+    instrument_directory,
+    instrument_file,
+    setup_instrumented_environment,
+    should_instrument_line,
 )
 
 
@@ -131,8 +129,12 @@ class TestInstrumentDirectory:
             source_dir.mkdir()
 
             # Create multiple .ado files
-            (source_dir / "func1.ado").write_text("program define func1\n    gen x = 1\nend\n")
-            (source_dir / "func2.ado").write_text("program define func2\n    gen y = 2\nend\n")
+            (source_dir / "func1.ado").write_text(
+                "program define func1\n    gen x = 1\nend\n"
+            )
+            (source_dir / "func2.ado").write_text(
+                "program define func2\n    gen y = 2\nend\n"
+            )
             (source_dir / "notado.txt").write_text("not an ado file")
 
             dest_dir = tmppath / "instrumented"
@@ -155,7 +157,9 @@ class TestSetupInstrumentedEnvironment:
             tmppath = Path(tmpdir)
             source_dir = tmppath / "source"
             source_dir.mkdir()
-            (source_dir / "test.ado").write_text("program define test\n    gen x = 1\nend\n")
+            (source_dir / "test.ado").write_text(
+                "program define test\n    gen x = 1\nend\n"
+            )
 
             instrumented_dir, maps = setup_instrumented_environment(
                 [source_dir], tmppath

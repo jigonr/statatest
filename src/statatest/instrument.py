@@ -60,10 +60,7 @@ def should_instrument_line(line: str) -> bool:
 
     # Skip lines that are just closing braces or keywords
     stripped = line.strip().lower()
-    if stripped in ("}", "else", "else {"):
-        return False
-
-    return True
+    return stripped not in ("}", "else", "else {")
 
 
 def instrument_file(source_path: Path, dest_path: Path) -> dict[int, int]:

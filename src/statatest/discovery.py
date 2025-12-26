@@ -75,8 +75,7 @@ def _parse_test_file(path: Path) -> TestFile:
 
     # Extract markers
     marker_pattern = re.compile(r"//\s*@marker:\s*(\w+)", re.IGNORECASE)
-    for match in marker_pattern.finditer(content):
-        markers.append(match.group(1).lower())
+    markers.extend(match.group(1).lower() for match in marker_pattern.finditer(content))
 
     # Extract program definitions
     program_pattern = re.compile(
@@ -97,7 +96,4 @@ def _matches_filters(
     if marker and marker.lower() not in test_file.markers:
         return False
 
-    if keyword and keyword.lower() not in test_file.name.lower():
-        return False
-
-    return True
+    return not (keyword and keyword.lower() not in test_file.name.lower())

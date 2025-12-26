@@ -12,8 +12,8 @@ from rich.console import Console
 from statatest import __version__
 from statatest.config import Config, load_config
 from statatest.discovery import discover_tests
-from statatest.runner import run_tests
 from statatest.report import write_junit_xml
+from statatest.runner import run_tests
 
 if TYPE_CHECKING:
     from statatest.models import TestResult
@@ -107,7 +107,7 @@ def main(
 
 def _create_config_template() -> None:
     """Create a statatest.toml template in the current directory."""
-    template = '''[tool.statatest]
+    template = """[tool.statatest]
 testpaths = ["tests"]
 test_files = ["test_*.do"]
 stata_executable = "stata-mp"
@@ -119,21 +119,21 @@ omit = ["tests/*"]
 [tool.statatest.reporting]
 junit_xml = "junit.xml"
 lcov = "coverage.lcov"
-'''
+"""
     config_path = Path.cwd() / "statatest.toml"
     if config_path.exists():
         console.print("[yellow]statatest.toml already exists.[/yellow]")
         return
 
     config_path.write_text(template)
-    console.print(f"[green]Created statatest.toml[/green]")
+    console.print("[green]Created statatest.toml[/green]")
 
 
 def _generate_coverage_report(
     results: list[TestResult], report_format: str, config: Config
 ) -> None:
     """Generate coverage report in the specified format."""
-    from statatest.coverage import generate_lcov, generate_html
+    from statatest.coverage import generate_html, generate_lcov
 
     match report_format.lower():
         case "lcov":
@@ -152,16 +152,13 @@ def _print_summary(results: list[TestResult]) -> None:
     """Print test results summary."""
     passed = sum(1 for r in results if r.passed)
     failed = sum(1 for r in results if not r.passed)
-    total = len(results)
     total_time = sum(r.duration for r in results)
 
     console.print()
     console.print("=" * 60)
 
     if failed == 0:
-        console.print(
-            f"[bold green]{passed} passed[/bold green] in {total_time:.2f}s"
-        )
+        console.print(f"[bold green]{passed} passed[/bold green] in {total_time:.2f}s")
     else:
         console.print(
             f"[bold red]{failed} failed[/bold red], "
