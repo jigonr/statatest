@@ -44,6 +44,9 @@ docs = [
     "mkdocs-material>=9.5.0",
     "pymdown-extensions>=10.0.0",
 ]
+# Economic fixtures and assertions (panels, networks, accounting)
+# Install with: pip install statatest[econ]
+econ = []  # No additional Python deps, just .ado files
 
 [project.scripts]
 statatest = "statatest.cli:main"
