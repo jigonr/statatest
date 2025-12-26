@@ -43,6 +43,7 @@ nav:
       - Fixtures: guide/fixtures.md
       - Coverage: guide/coverage.md
       - Configuration: guide/configuration.md
+      - Troubleshooting: guide/troubleshooting.md
   - CI Integration:
       - GitHub Actions: ci/github-actions.md
       - Codecov: ci/codecov.md
