@@ -1,0 +1,72 @@
+site_name: statatest
+site_url: https://jigonr.github.io/statatest/
+site_description: Pytest-inspired testing and coverage framework for Stata
+site_author: Jose Ignacio Gonzalez Rojas
+
+repo_name: jigonr/statatest
+repo_url: https://github.com/jigonr/statatest
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+      - First Test: getting-started/first-test.md
+  - User Guide:
+      - Assertions: guide/assertions.md
+      - Fixtures: guide/fixtures.md
+      - Coverage: guide/coverage.md
+      - Configuration: guide/configuration.md
+  - CI Integration:
+      - GitHub Actions: ci/github-actions.md
+      - Codecov: ci/codecov.md
+  - Reference:
+      - CLI: reference/cli.md
+      - Configuration: reference/config.md
+  - Migration: migration.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jigonr/statatest

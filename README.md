@@ -5,8 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/jigonr/statatest/actions/workflows/ci.yml/badge.svg)](https://github.com/jigonr/statatest/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/jigonr/statatest/branch/main/graph/badge.svg)](https://codecov.io/gh/jigonr/statatest)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://jigonr.github.io/statatest/)
 
 A pytest-inspired testing and code coverage framework for Stata.
+
+**[Documentation](https://jigonr.github.io/statatest/)** | **[GitHub](https://github.com/jigonr/statatest)** | **[PyPI](https://pypi.org/project/statatest/)**
 
 ## Features
 
