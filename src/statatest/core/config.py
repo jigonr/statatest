@@ -1,8 +1,7 @@
 """Configuration management for statatest.
 
-This module provides:
-- Config: Dataclass holding all configuration options
-- load_config: Function to load configuration from TOML files
+This module provides Config, a dataclass that holds all configuration options
+and knows how to load itself from TOML files.
 """
 
 from __future__ import annotations
@@ -30,11 +29,6 @@ class Config:
         stata_executable: Path or name of Stata executable.
         timeout: Timeout in seconds for each test file.
         verbose: Whether to show verbose output.
-        adopath_mode: How to handle ado path setup:
-            - "auto": Add statatest assertions/fixtures to adopath (default)
-            - "none": User manages adopath (packages already installed)
-            - "custom": Use only paths from adopath list
-        adopath: Additional paths to add to Stata's adopath.
         setup_do: Path to a setup.do file to run before each test.
         coverage_source: Directories containing source files for coverage.
         coverage_omit: Patterns for files to exclude from coverage.
@@ -46,8 +40,6 @@ class Config:
     stata_executable: str = DEFAULT_STATA_EXECUTABLE
     timeout: int = DEFAULT_TIMEOUT_SECONDS
     verbose: bool = False
-    adopath_mode: str = "auto"
-    adopath: list[str] = field(default_factory=list)
     setup_do: str | None = None
     coverage_source: list[str] = field(default_factory=list)
     coverage_omit: list[str] = field(default_factory=list)
@@ -64,111 +56,96 @@ class Config:
         if not self.test_files:
             self.test_files = list(DEFAULT_TEST_FILE_PATTERNS)
 
+    @classmethod
+    def from_project(cls, project_root: Path) -> Config:
+        """Load configuration from project directory.
 
-def load_config(project_root: Path) -> Config:
-    """Load configuration from statatest.toml or pyproject.toml.
+        Config file precedence (first found wins):
+        1. statatest.toml
+        2. pyproject.toml [tool.statatest]
 
-    Config file precedence (first found wins):
-    1. statatest.toml
-    2. pyproject.toml [tool.statatest]
+        Args:
+            project_root: Root directory of the project.
 
-    Args:
-        project_root: Root directory of the project.
+        Returns:
+            Config object with settings from file, or defaults if no config found.
+        """
+        settings = cls._load_settings(project_root)
+        return cls(**settings)
 
-    Returns:
-        Config object with merged settings.
-    """
-    config = Config()
+    @classmethod
+    def _load_settings(cls, project_root: Path) -> dict[str, Any]:
+        """Load settings from TOML files in project directory.
 
-    # Try statatest.toml first
-    statatest_toml = project_root / "statatest.toml"
-    if statatest_toml.exists():
-        data = _load_toml(statatest_toml)
-        settings = data.get("tool", {}).get("statatest", data)
-        _apply_settings(config, settings)
-        return config
+        Args:
+            project_root: Root directory of the project.
 
-    # Fall back to pyproject.toml
-    pyproject_toml = project_root / "pyproject.toml"
-    if pyproject_toml.exists():
-        data = _load_toml(pyproject_toml)
-        settings = data.get("tool", {}).get("statatest", {})
-        if settings:
-            _apply_settings(config, settings)
-            return config
+        Returns:
+            Dictionary of settings suitable for Config.__init__.
+        """
+        # Try statatest.toml first
+        statatest_toml = project_root / "statatest.toml"
+        if statatest_toml.exists():
+            data = cls._load_toml(statatest_toml)
+            # statatest.toml can have settings at root or under [tool.statatest]
+            raw_settings = data.get("tool", {}).get("statatest", data)
+            return cls._extract_settings(raw_settings)
 
-    return config
+        # Fall back to pyproject.toml
+        pyproject_toml = project_root / "pyproject.toml"
+        if pyproject_toml.exists():
+            data = cls._load_toml(pyproject_toml)
+            raw_settings = data.get("tool", {}).get("statatest", {})
+            if raw_settings:
+                return cls._extract_settings(raw_settings)
 
+        # No config found - return empty dict (dataclass defaults will apply)
+        return {}
 
-def _load_toml(path: Path) -> dict[str, Any]:
-    """Load and parse a TOML file.
+    @staticmethod
+    def _load_toml(path: Path) -> dict[str, Any]:
+        """Load and parse a TOML file.
 
-    Args:
-        path: Path to the TOML file.
+        Args:
+            path: Path to the TOML file.
 
-    Returns:
-        Parsed TOML content as dictionary.
-    """
-    with path.open("rb") as f:
-        return tomllib.load(f)
+        Returns:
+            Parsed TOML content as dictionary.
+        """
+        with path.open("rb") as f:
+            return tomllib.load(f)
 
+    @classmethod
+    def _extract_settings(cls, raw: dict[str, Any]) -> dict[str, Any]:
+        """Extract and transform settings for Config.__init__.
 
-def _apply_settings(config: Config, settings: dict[str, Any]) -> None:
-    """Apply settings dictionary to config object.
+        Args:
+            raw: Raw settings dictionary from TOML file.
 
-    Args:
-        config: Config object to modify.
-        settings: Dictionary of settings from TOML file.
-    """
-    _apply_core_settings(config, settings)
-    _apply_adopath_settings(config, settings)
-    _apply_coverage_settings(config, settings)
-    config.reporting = settings.get("reporting", {})
+        Returns:
+            Dictionary with keys matching Config field names.
+        """
+        settings: dict[str, Any] = {}
 
+        # Direct mappings (TOML key == Config field name)
+        direct_keys = [
+            "testpaths",
+            "test_files",
+            "stata_executable",
+            "timeout",
+            "verbose",
+            "setup_do",
+            "reporting",
+        ]
+        for key in direct_keys:
+            if key in raw:
+                settings[key] = raw[key]
 
-def _apply_core_settings(config: Config, settings: dict[str, Any]) -> None:
-    """Apply core settings (testpaths, executable, timeout, verbose).
+        # Nested coverage settings
+        coverage = raw.get("coverage", {})
+        if "source" in coverage:
+            settings["coverage_source"] = coverage["source"]
+        if "omit" in coverage:
+            settings["coverage_omit"] = coverage["omit"]
 
-    Args:
-        config: Config object to modify.
-        settings: Dictionary of settings from TOML file.
-    """
-    if "testpaths" in settings:
-        config.testpaths = settings["testpaths"]
-    if "test_files" in settings:
-        config.test_files = settings["test_files"]
-    if "stata_executable" in settings:
-        config.stata_executable = settings["stata_executable"]
-    if "timeout" in settings:
-        config.timeout = settings["timeout"]
-    if "verbose" in settings:
-        config.verbose = settings["verbose"]
-
-
-def _apply_adopath_settings(config: Config, settings: dict[str, Any]) -> None:
-    """Apply adopath settings (mode, custom paths, setup_do).
-
-    Args:
-        config: Config object to modify.
-        settings: Dictionary of settings from TOML file.
-    """
-    if "adopath_mode" in settings:
-        config.adopath_mode = settings["adopath_mode"]
-    if "adopath" in settings:
-        config.adopath = settings["adopath"]
-    if "setup_do" in settings:
-        config.setup_do = settings["setup_do"]
-
-
-def _apply_coverage_settings(config: Config, settings: dict[str, Any]) -> None:
-    """Apply coverage settings (source, omit).
-
-    Args:
-        config: Config object to modify.
-        settings: Dictionary of settings from TOML file.
-    """
-    coverage = settings.get("coverage", {})
-    if "source" in coverage:
-        config.coverage_source = coverage["source"]
-    if "omit" in coverage:
-        config.coverage_omit = coverage["omit"]
+        return settings

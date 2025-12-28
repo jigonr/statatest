@@ -129,7 +129,7 @@ def _prepare_environment(
     Returns:
         TestEnvironment with paths to temporary files.
     """
-    ado_paths = _get_ado_paths_for_mode(config)
+    ado_paths = _get_ado_paths()
     conftest_files = discover_conftest(test.path.parent)
 
     wrapper_content = create_wrapper_do(
@@ -220,29 +220,6 @@ def _cleanup_environment(env: TestEnvironment) -> None:
     for path in [env.log_path, env.wrapper_path]:
         with contextlib.suppress(FileNotFoundError):
             path.unlink()
-
-
-def _get_ado_paths_for_mode(config: Config) -> dict[str, Path]:
-    """Get ado paths based on configuration mode.
-
-    Args:
-        config: Configuration with adopath_mode and adopath settings.
-
-    Returns:
-        Dictionary of ado paths to add. Empty dict if user manages paths.
-    """
-    if config.adopath_mode == "none":
-        return {}
-
-    if config.adopath_mode == "custom":
-        return {f"custom_{i}": Path(p) for i, p in enumerate(config.adopath)}
-
-    # Default "auto" mode
-    paths = _get_ado_paths()
-    for i, custom_path in enumerate(config.adopath):
-        paths[f"custom_{i}"] = Path(custom_path)
-
-    return paths
 
 
 def _get_ado_paths() -> dict[str, Path]:
