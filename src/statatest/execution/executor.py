@@ -132,8 +132,9 @@ def _prepare_environment(
     ado_paths = _get_ado_paths()
     conftest_files = discover_conftest(test.path.parent)
 
+    # Use relative path for test file (we run from test.path.parent)
     wrapper_content = create_wrapper_do(
-        test_path=test.path,
+        test_path=Path(test.path.name),
         ado_paths=ado_paths,
         conftest_files=conftest_files,
         instrumented_dir=instrumented_dir,
@@ -179,12 +180,13 @@ def _execute_stata(
     start_time = time.time()
     log_flag = "-s" if coverage else "-b"
 
+    # Stata usage: stata-mp [-h -q -s -b] ["stata command"]
+    # The command should be a single quoted argument
     cmd = [
         config.stata_executable,
         log_flag,
         "-q",
-        "do",
-        str(env.wrapper_path),
+        f"do {env.wrapper_path}",
     ]
 
     process = subprocess.run(  # noqa: S603
