@@ -2,6 +2,29 @@
 
 The `jigonr/statatest/action` provides zero-install Stata testing in GitHub Actions.
 
+## Why Use This Action?
+
+| Without Action | With Action |
+|----------------|-------------|
+| Install Python locally | No local Python needed |
+| Install uv locally | No local uv needed |
+| Install statatest locally | No local statatest needed |
+| Configure Dockerfile manually | Just reference the action |
+| Set up license manually | Action handles license setup |
+
+**You still need:**
+
+- A valid Stata license (stored as GitHub secret)
+- AEA Data Editor's Docker image (for running Stata)
+
+**The action handles:**
+
+- Installing Python/uv inside the container
+- Installing statatest
+- Setting up the Stata license
+- Running tests and generating reports
+- Output for Codecov integration
+
 ## Quick Start
 
 ```yaml
