@@ -9,12 +9,12 @@ import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
 
+from statatest.core.constants import (
+    JUNIT_FAILURE_MAX_LENGTH,
+    JUNIT_STDERR_MAX_LENGTH,
+    JUNIT_STDOUT_MAX_LENGTH,
+)
 from statatest.core.models import TestResult
-
-# Output truncation limits (avoid huge XML files)
-_STDOUT_MAX_LENGTH = 5000
-_STDERR_MAX_LENGTH = 2000
-_FAILURE_MAX_LENGTH = 2000
 
 
 def write_junit_xml(results: list[TestResult], output_path: Path) -> None:
@@ -143,7 +143,7 @@ def _add_failure_element(testcase: ET.Element, result: TestResult) -> None:
     failure = ET.SubElement(testcase, "failure")
     failure.set("message", result.error_message)
     failure.set("type", "AssertionError")
-    failure.text = result.stdout[-_FAILURE_MAX_LENGTH:] if result.stdout else ""
+    failure.text = result.stdout[-JUNIT_FAILURE_MAX_LENGTH:] if result.stdout else ""
 
 
 def _add_system_out(testcase: ET.Element, stdout: str) -> None:
@@ -154,7 +154,7 @@ def _add_system_out(testcase: ET.Element, stdout: str) -> None:
         stdout: Standard output content.
     """
     system_out = ET.SubElement(testcase, "system-out")
-    system_out.text = stdout[-_STDOUT_MAX_LENGTH:]
+    system_out.text = stdout[-JUNIT_STDOUT_MAX_LENGTH:]
 
 
 def _add_system_err(testcase: ET.Element, stderr: str) -> None:
@@ -165,7 +165,7 @@ def _add_system_err(testcase: ET.Element, stderr: str) -> None:
         stderr: Standard error content.
     """
     system_err = ET.SubElement(testcase, "system-err")
-    system_err.text = stderr[-_STDERR_MAX_LENGTH:]
+    system_err.text = stderr[-JUNIT_STDERR_MAX_LENGTH:]
 
 
 def _write_xml(root: ET.Element, output_path: Path) -> None:

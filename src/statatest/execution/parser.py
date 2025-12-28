@@ -10,21 +10,26 @@ from __future__ import annotations
 
 import re
 
-from statatest.core.constants import ERROR_MESSAGE_MAX_LENGTH
+from statatest.core.constants import (
+    ERROR_MESSAGE_MAX_LENGTH,
+    PATTERN_ASSERTION_FAILED,
+    PATTERN_ASSERTION_PASSED,
+    PATTERN_COVERAGE_MARKER,
+)
 from statatest.core.models import TestFile, TestResult
 from statatest.execution.models import StataOutput
 
 # Compiled regex patterns for performance
-_PASS_PATTERN = re.compile(r"_STATATEST_PASS_:(\w+)_")
-_FAIL_PATTERN = re.compile(r"_STATATEST_FAIL_:(\w+)_:(.+?)_END_")
-_COVERAGE_PATTERN = re.compile(r"\{\*\s*COV:([^:]+):(\d+)\s*\}")
+_PASS_PATTERN = re.compile(PATTERN_ASSERTION_PASSED)
+_FAIL_PATTERN = re.compile(PATTERN_ASSERTION_FAILED)
+_COVERAGE_PATTERN = re.compile(PATTERN_COVERAGE_MARKER)
 
 # Error patterns for message extraction
-_ERROR_PATTERNS = [
+_ERROR_PATTERNS = (
     re.compile(r"r\((\d+)\);"),  # Stata return codes
     re.compile(r"assertion is false", re.IGNORECASE),  # Assert failures
     re.compile(r"^error:?\s*(.+)$", re.MULTILINE | re.IGNORECASE),  # Generic errors
-]
+)
 
 
 def parse_test_output(

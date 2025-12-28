@@ -10,14 +10,12 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from statatest.core.constants import PATTERN_MARKER, PATTERN_PROGRAM
 from statatest.core.models import TestFile
 
 # Compiled regex patterns for performance
-_MARKER_PATTERN = re.compile(r"//\s*@marker:\s*(\w+)", re.IGNORECASE)
-_PROGRAM_PATTERN = re.compile(
-    r"^\s*program\s+(?:define\s+)?(\w+)",
-    re.MULTILINE | re.IGNORECASE,
-)
+_MARKER_PATTERN = re.compile(PATTERN_MARKER, re.IGNORECASE)
+_PROGRAM_PATTERN = re.compile(PATTERN_PROGRAM, re.MULTILINE | re.IGNORECASE)
 
 
 def parse_test_file(path: Path) -> TestFile:
