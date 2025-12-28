@@ -122,7 +122,7 @@ def _prepare_environment(
 
     Args:
         test: TestFile to execute.
-        config: Configuration object with adopath settings.
+        config: Configuration object.
         coverage: Whether coverage collection is enabled.
         instrumented_dir: Path to instrumented source files.
 
