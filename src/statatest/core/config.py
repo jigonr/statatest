@@ -41,10 +41,8 @@ class Config:
         reporting: Reporting configuration (junit_xml, lcov paths).
     """
 
-    testpaths: list[str] = field(default_factory=lambda: list(DEFAULT_TEST_PATHS))
-    test_files: list[str] = field(
-        default_factory=lambda: list(DEFAULT_TEST_FILE_PATTERNS)
-    )
+    testpaths: list[str] = field(default_factory=list)
+    test_files: list[str] = field(default_factory=list)
     stata_executable: str = DEFAULT_STATA_EXECUTABLE
     timeout: int = DEFAULT_TIMEOUT_SECONDS
     verbose: bool = False
@@ -54,6 +52,17 @@ class Config:
     coverage_source: list[str] = field(default_factory=list)
     coverage_omit: list[str] = field(default_factory=list)
     reporting: dict[str, str] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Apply default values for empty lists.
+
+        This method is called after dataclass __init__ completes.
+        It sets default values from constants when lists are empty.
+        """
+        if not self.testpaths:
+            self.testpaths = list(DEFAULT_TEST_PATHS)
+        if not self.test_files:
+            self.test_files = list(DEFAULT_TEST_FILE_PATTERNS)
 
 
 def load_config(project_root: Path) -> Config:
