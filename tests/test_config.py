@@ -3,10 +3,10 @@
 import tempfile
 from pathlib import Path
 
-from statatest.core.config import Config, load_config
+from statatest.core.config import Config
 
 
-def test_default_config():
+def test_default_config() -> None:
     """Test default configuration values."""
     config = Config()
 
@@ -14,9 +14,11 @@ def test_default_config():
     assert config.test_files == ["test_*.do"]
     assert config.stata_executable == "stata-mp"
     assert config.verbose is False
+    assert config.setup_do is None
+    assert config.timeout == 300
 
 
-def test_load_config_from_statatest_toml():
+def test_from_project_statatest_toml() -> None:
     """Test loading config from statatest.toml."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
@@ -34,7 +36,7 @@ omit = ["tests/*"]
 """
         )
 
-        config = load_config(tmppath)
+        config = Config.from_project(tmppath)
 
         assert config.testpaths == ["my_tests"]
         assert config.stata_executable == "stata-se"
@@ -42,7 +44,7 @@ omit = ["tests/*"]
         assert config.coverage_omit == ["tests/*"]
 
 
-def test_load_config_from_pyproject_toml():
+def test_from_project_pyproject_toml() -> None:
     """Test loading config from pyproject.toml."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
@@ -59,13 +61,13 @@ verbose = true
 """
         )
 
-        config = load_config(tmppath)
+        config = Config.from_project(tmppath)
 
         assert config.testpaths == ["tests", "integration"]
         assert config.verbose is True
 
 
-def test_load_config_statatest_toml_takes_precedence():
+def test_from_project_statatest_toml_takes_precedence() -> None:
     """Test that statatest.toml takes precedence over pyproject.toml."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
@@ -85,67 +87,23 @@ stata_executable = "stata-se"
 """
         )
 
-        config = load_config(tmppath)
+        config = Config.from_project(tmppath)
 
         # statatest.toml should win
         assert config.stata_executable == "stata-mp"
 
 
-def test_load_config_no_config_file():
+def test_from_project_no_config_file() -> None:
     """Test that defaults are used when no config file exists."""
     with tempfile.TemporaryDirectory() as tmpdir:
-        config = load_config(Path(tmpdir))
+        config = Config.from_project(Path(tmpdir))
 
         # Should use defaults
         assert config.testpaths == ["tests"]
         assert config.stata_executable == "stata-mp"
 
 
-def test_default_config_adopath_settings():
-    """Test default adopath configuration values."""
-    config = Config()
-
-    assert config.adopath_mode == "auto"
-    assert config.adopath == []
-    assert config.setup_do is None
-    assert config.timeout == 300
-
-
-def test_load_config_adopath_none_mode():
-    """Test loading config with adopath_mode = 'none'."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
-
-        (tmppath / "statatest.toml").write_text(
-            """
-[tool.statatest]
-adopath_mode = "none"
-"""
-        )
-
-        config = load_config(tmppath)
-        assert config.adopath_mode == "none"
-
-
-def test_load_config_custom_adopaths():
-    """Test loading config with custom adopath entries."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmppath = Path(tmpdir)
-
-        (tmppath / "statatest.toml").write_text(
-            """
-[tool.statatest]
-adopath_mode = "custom"
-adopath = ["./code/functions", "./lib/ado"]
-"""
-        )
-
-        config = load_config(tmppath)
-        assert config.adopath_mode == "custom"
-        assert config.adopath == ["./code/functions", "./lib/ado"]
-
-
-def test_load_config_setup_do():
+def test_from_project_setup_do() -> None:
     """Test loading config with setup_do option."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
@@ -157,11 +115,11 @@ setup_do = "tests/setup.do"
 """
         )
 
-        config = load_config(tmppath)
+        config = Config.from_project(tmppath)
         assert config.setup_do == "tests/setup.do"
 
 
-def test_load_config_timeout():
+def test_from_project_timeout() -> None:
     """Test loading config with custom timeout."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
@@ -173,5 +131,5 @@ timeout = 600
 """
         )
 
-        config = load_config(tmppath)
+        config = Config.from_project(tmppath)
         assert config.timeout == 600

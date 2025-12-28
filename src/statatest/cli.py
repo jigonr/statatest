@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 import click
 
 from statatest import __version__
-from statatest.core.config import Config, load_config
+from statatest.core.config import Config
 from statatest.core.logging import Colors, colorize, configure_logging
 from statatest.coverage.instrument import (
     cleanup_instrumented_environment,
@@ -173,7 +173,7 @@ def main(
     configure_logging(verbose)
 
     # Load configuration
-    config = load_config(Path.cwd())
+    config = Config.from_project(Path.cwd())
     if verbose:
         config.verbose = True
 

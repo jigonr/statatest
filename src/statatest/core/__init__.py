@@ -6,7 +6,7 @@ This module contains the foundational components used across statatest:
 - constants: Magic numbers and default values
 """
 
-from statatest.core.config import Config, load_config
+from statatest.core.config import Config
 from statatest.core.constants import (
     COVERAGE_HIGH_THRESHOLD,
     COVERAGE_MEDIUM_THRESHOLD,
@@ -31,5 +31,4 @@ __all__ = [
     "TestFile",
     "TestResult",
     "TestSuite",
-    "load_config",
 ]

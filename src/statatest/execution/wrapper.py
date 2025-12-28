@@ -21,14 +21,14 @@ def create_wrapper_do(
     The wrapper executes in this order:
     1. Clear and set Stata options
     2. Add instrumented directory (for coverage) - highest priority
-    3. Add ado paths (if adopath_mode is not "none")
+    3. Add statatest ado paths (assertions, fixtures)
     4. Run setup_do (if configured)
     5. Load conftest.do files (fixtures and shared setup)
     6. Run the actual test
 
     Args:
         test_path: Path to the test file.
-        ado_paths: Dictionary of ado paths to add. May be empty if user manages paths.
+        ado_paths: Dictionary of ado paths to add (statatest assertions/fixtures).
         conftest_files: List of conftest.do files to load (in order).
         instrumented_dir: Path to instrumented source files (for coverage).
         setup_do: Optional path to a setup.do file for custom initialization.
