@@ -10,7 +10,7 @@ from statatest.fixtures import (
     get_test_fixtures,
     parse_conftest,
 )
-from statatest.models import TestFile
+from statatest.core.models import TestFile
 
 
 def test_fixture_dataclass():

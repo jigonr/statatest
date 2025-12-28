@@ -4,6 +4,8 @@ This module centralizes all magic numbers and default values to:
 1. Make them easy to find and modify
 2. Prevent duplication across modules
 3. Enable configuration override in the future
+
+All constants follow UPPER_SNAKE_CASE naming convention per Google style guide.
 """
 
 from __future__ import annotations

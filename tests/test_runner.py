@@ -4,15 +4,15 @@ import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from statatest.config import Config
-from statatest.models import TestFile
-from statatest.runner import (
-    _create_wrapper_do,
-    _extract_error_message,
-    _get_ado_paths,
-    _parse_coverage_markers,
-    run_tests,
+from statatest.core.config import Config
+from statatest.core.models import TestFile
+from statatest.execution import run_tests
+from statatest.execution.executor import _get_ado_paths
+from statatest.execution.parser import (
+    extract_error_message as _extract_error_message,
+    parse_coverage_markers as _parse_coverage_markers,
 )
+from statatest.execution.wrapper import create_wrapper_do as _create_wrapper_do
 
 
 class TestGetAdoPaths:
@@ -174,7 +174,7 @@ class TestExtractErrorMessage:
 class TestRunTests:
     """Tests for run_tests function."""
 
-    @patch("statatest.runner._run_single_test")
+    @patch("statatest.execution.executor._run_single_test")
     def test_runs_all_tests(self, mock_run_single):
         """Test that all tests are executed."""
         config = Config()
@@ -193,7 +193,7 @@ class TestRunTests:
         assert len(results) == 2
         assert mock_run_single.call_count == 2
 
-    @patch("statatest.runner._run_single_test")
+    @patch("statatest.execution.executor._run_single_test")
     def test_passes_coverage_flag(self, mock_run_single):
         """Test that coverage flag is passed to single test runner."""
         config = Config()
@@ -210,7 +210,7 @@ class TestRunTests:
         call_args = mock_run_single.call_args
         assert call_args[0][2] is True  # coverage arg
 
-    @patch("statatest.runner._run_single_test")
+    @patch("statatest.execution.executor._run_single_test")
     def test_passes_instrumented_dir(self, mock_run_single):
         """Test that instrumented_dir is passed to single test runner."""
         config = Config()
@@ -232,14 +232,14 @@ class TestRunTests:
 class TestRunSingleTest:
     """Tests for _run_single_test function."""
 
-    @patch("statatest.runner.subprocess.run")
-    @patch("statatest.runner._get_ado_paths")
+    @patch("statatest.execution.executor.subprocess.run")
+    @patch("statatest.execution.executor._get_ado_paths")
     @patch("statatest.fixtures.discover_conftest")
     def test_handles_timeout(self, mock_conftest, mock_ado, mock_subprocess):
         """Test handling of subprocess timeout."""
         import subprocess
 
-        from statatest.runner import _run_single_test
+        from statatest.execution.executor import _run_single_test
 
         mock_ado.return_value = {}
         mock_conftest.return_value = []
@@ -259,12 +259,12 @@ class TestRunSingleTest:
         assert result.passed is False
         assert "timed out" in result.error_message.lower()
 
-    @patch("statatest.runner.subprocess.run")
-    @patch("statatest.runner._get_ado_paths")
+    @patch("statatest.execution.executor.subprocess.run")
+    @patch("statatest.execution.executor._get_ado_paths")
     @patch("statatest.fixtures.discover_conftest")
     def test_handles_file_not_found(self, mock_conftest, mock_ado, mock_subprocess):
         """Test handling when Stata executable is not found."""
-        from statatest.runner import _run_single_test
+        from statatest.execution.executor import _run_single_test
 
         mock_ado.return_value = {}
         mock_conftest.return_value = []

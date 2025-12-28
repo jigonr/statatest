@@ -3,15 +3,15 @@
 import tempfile
 from pathlib import Path
 
+from statatest.core.models import TestResult
 from statatest.coverage import (
     CoverageReport,
     FileCoverage,
     aggregate_coverage,
     generate_html,
     generate_lcov,
-    parse_smcl_log,
 )
-from statatest.models import TestResult
+from statatest.execution.parser import parse_coverage_markers as parse_smcl_log
 
 
 class TestFileCoverage:

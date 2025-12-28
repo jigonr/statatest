@@ -1,4 +1,9 @@
-"""Configuration management for statatest."""
+"""Configuration management for statatest.
+
+This module provides:
+- Config: Dataclass holding all configuration options
+- load_config: Function to load configuration from TOML files
+"""
 
 from __future__ import annotations
 
@@ -7,7 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from statatest.constants import (
+from statatest.core.constants import (
     DEFAULT_STATA_EXECUTABLE,
     DEFAULT_TEST_FILE_PATTERNS,
     DEFAULT_TEST_PATHS,
@@ -87,7 +92,14 @@ def load_config(project_root: Path) -> Config:
 
 
 def _load_toml(path: Path) -> dict[str, Any]:
-    """Load TOML file."""
+    """Load and parse a TOML file.
+
+    Args:
+        path: Path to the TOML file.
+
+    Returns:
+        Parsed TOML content as dictionary.
+    """
     with path.open("rb") as f:
         return tomllib.load(f)
 
@@ -106,7 +118,12 @@ def _apply_settings(config: Config, settings: dict[str, Any]) -> None:
 
 
 def _apply_core_settings(config: Config, settings: dict[str, Any]) -> None:
-    """Apply core settings (testpaths, executable, timeout, verbose)."""
+    """Apply core settings (testpaths, executable, timeout, verbose).
+
+    Args:
+        config: Config object to modify.
+        settings: Dictionary of settings from TOML file.
+    """
     if "testpaths" in settings:
         config.testpaths = settings["testpaths"]
     if "test_files" in settings:
@@ -120,7 +137,12 @@ def _apply_core_settings(config: Config, settings: dict[str, Any]) -> None:
 
 
 def _apply_adopath_settings(config: Config, settings: dict[str, Any]) -> None:
-    """Apply adopath settings (mode, custom paths, setup_do)."""
+    """Apply adopath settings (mode, custom paths, setup_do).
+
+    Args:
+        config: Config object to modify.
+        settings: Dictionary of settings from TOML file.
+    """
     if "adopath_mode" in settings:
         config.adopath_mode = settings["adopath_mode"]
     if "adopath" in settings:
@@ -130,7 +152,12 @@ def _apply_adopath_settings(config: Config, settings: dict[str, Any]) -> None:
 
 
 def _apply_coverage_settings(config: Config, settings: dict[str, Any]) -> None:
-    """Apply coverage settings (source, omit)."""
+    """Apply coverage settings (source, omit).
+
+    Args:
+        config: Config object to modify.
+        settings: Dictionary of settings from TOML file.
+    """
     coverage = settings.get("coverage", {})
     if "source" in coverage:
         config.coverage_source = coverage["source"]

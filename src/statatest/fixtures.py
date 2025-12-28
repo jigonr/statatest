@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from statatest.models import TestFile
+    from statatest.core.models import TestFile
 
 
 @dataclass(slots=True)

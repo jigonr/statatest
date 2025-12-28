@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from statatest.config import Config, load_config
+from statatest.core.config import Config, load_config
 
 
 def test_default_config():

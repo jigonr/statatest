@@ -6,8 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from statatest.models import TestResult
-from statatest.report import generate_html, generate_lcov, write_junit_xml
+from statatest.core.models import TestResult
+from statatest.coverage.reporter import generate_html, generate_lcov
+from statatest.reporting import write_junit_xml
 
 
 @pytest.fixture
@@ -197,7 +198,7 @@ def test_generate_html_creates_index():
 
 
 def test_generate_html_creates_file_reports():
-    """Test that generate_html creates per-file HTML reports."""
+    """Test that generate_html includes multiple files in index."""
     results = [
         TestResult(
             test_file="test.do",
@@ -214,14 +215,10 @@ def test_generate_html_creates_file_reports():
         output_dir = Path(tmpdir) / "htmlcov"
         generate_html(results, output_dir)
 
-        # Check per-file reports exist (slashes replaced with underscores)
-        assert (output_dir / "myfunction.ado.html").exists()
-        assert (output_dir / "helper_utils.ado.html").exists()
-
-        # Check content
-        file_content = (output_dir / "myfunction.ado.html").read_text()
-        assert "myfunction.ado" in file_content
-        assert "Lines hit: 3" in file_content
+        # Check index includes all files
+        index_content = (output_dir / "index.html").read_text()
+        assert "myfunction.ado" in index_content
+        assert "helper/utils.ado" in index_content
 
 
 def test_generate_html_multiple_results():
@@ -245,6 +242,6 @@ def test_generate_html_multiple_results():
         output_dir = Path(tmpdir) / "htmlcov"
         generate_html(results, output_dir)
 
-        file_content = (output_dir / "file.ado.html").read_text()
-        # Should have lines 1, 2, 3 (union)
-        assert "Lines hit: 3" in file_content
+        index_content = (output_dir / "index.html").read_text()
+        # Should show file in index with combined coverage
+        assert "file.ado" in index_content

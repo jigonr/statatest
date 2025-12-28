@@ -1,4 +1,10 @@
-"""Command-line interface for statatest."""
+"""Command-line interface for statatest.
+
+This module provides the CLI entry point. It follows the Controller pattern:
+- Parse arguments
+- Delegate to services (discovery, execution, reporting)
+- Handle exit codes
+"""
 
 from __future__ import annotations
 
@@ -10,17 +16,17 @@ import click
 from rich.console import Console
 
 from statatest import __version__
-from statatest.config import Config, load_config
+from statatest.core.config import Config, load_config
 from statatest.discovery import discover_tests
+from statatest.execution import run_tests
 from statatest.instrument import (
     cleanup_instrumented_environment,
     setup_instrumented_environment,
 )
-from statatest.report import write_junit_xml
-from statatest.runner import run_tests
+from statatest.reporting import write_junit_xml
 
 if TYPE_CHECKING:
-    from statatest.models import TestFile, TestResult
+    from statatest.core.models import TestFile, TestResult
 
 console = Console()
 
@@ -221,7 +227,7 @@ def _generate_coverage_report(
         config: Configuration object.
         line_maps: Optional mapping of instrumented to original line numbers.
     """
-    from statatest.coverage import generate_html, generate_lcov
+    from statatest.coverage.reporter import generate_html, generate_lcov
 
     # TODO: Use line_maps to map instrumented line numbers back to original
     _ = line_maps  # Suppress unused warning for now
