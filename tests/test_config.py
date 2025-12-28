@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from statatest.config import Config, load_config
+from statatest.core.config import Config, load_config
 
 
 def test_default_config():
@@ -99,3 +99,79 @@ def test_load_config_no_config_file():
         # Should use defaults
         assert config.testpaths == ["tests"]
         assert config.stata_executable == "stata-mp"
+
+
+def test_default_config_adopath_settings():
+    """Test default adopath configuration values."""
+    config = Config()
+
+    assert config.adopath_mode == "auto"
+    assert config.adopath == []
+    assert config.setup_do is None
+    assert config.timeout == 300
+
+
+def test_load_config_adopath_none_mode():
+    """Test loading config with adopath_mode = 'none'."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+
+        (tmppath / "statatest.toml").write_text(
+            """
+[tool.statatest]
+adopath_mode = "none"
+"""
+        )
+
+        config = load_config(tmppath)
+        assert config.adopath_mode == "none"
+
+
+def test_load_config_custom_adopaths():
+    """Test loading config with custom adopath entries."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+
+        (tmppath / "statatest.toml").write_text(
+            """
+[tool.statatest]
+adopath_mode = "custom"
+adopath = ["./code/functions", "./lib/ado"]
+"""
+        )
+
+        config = load_config(tmppath)
+        assert config.adopath_mode == "custom"
+        assert config.adopath == ["./code/functions", "./lib/ado"]
+
+
+def test_load_config_setup_do():
+    """Test loading config with setup_do option."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+
+        (tmppath / "statatest.toml").write_text(
+            """
+[tool.statatest]
+setup_do = "tests/setup.do"
+"""
+        )
+
+        config = load_config(tmppath)
+        assert config.setup_do == "tests/setup.do"
+
+
+def test_load_config_timeout():
+    """Test loading config with custom timeout."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+
+        (tmppath / "statatest.toml").write_text(
+            """
+[tool.statatest]
+timeout = 600
+"""
+        )
+
+        config = load_config(tmppath)
+        assert config.timeout == 600

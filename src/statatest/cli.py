@@ -1,4 +1,10 @@
-"""Command-line interface for statatest."""
+"""Command-line interface for statatest.
+
+This module provides the CLI entry point. It follows the Controller pattern:
+- Parse arguments
+- Delegate to services (discovery, execution, reporting)
+- Handle exit codes
+"""
 
 from __future__ import annotations
 
@@ -7,22 +13,20 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
-from rich.console import Console
 
 from statatest import __version__
-from statatest.config import Config, load_config
+from statatest.core.config import Config, load_config
+from statatest.core.logging import Colors, colorize, configure_logging
 from statatest.discovery import discover_tests
+from statatest.execution import run_tests
 from statatest.instrument import (
     cleanup_instrumented_environment,
     setup_instrumented_environment,
 )
-from statatest.report import write_junit_xml
-from statatest.runner import run_tests
+from statatest.reporting import write_junit_xml
 
 if TYPE_CHECKING:
-    from statatest.models import TestFile, TestResult
-
-console = Console()
+    from statatest.core.models import TestFile, TestResult
 
 
 def _setup_coverage(
@@ -39,21 +43,26 @@ def _setup_coverage(
     """
     source_dirs = [Path(p) for p in config.coverage_source]
     if not source_dirs:
-        console.print(
-            "[yellow]Warning: --coverage enabled but no coverage.source "
-            "configured in statatest.toml[/yellow]"
+        click.echo(
+            colorize(
+                "Warning: --coverage enabled but no coverage.source "
+                "configured in statatest.toml",
+                Colors.YELLOW,
+            )
         )
         return None, {}
 
     if verbose:
-        console.print(f"[dim]Instrumenting source files from: {source_dirs}[/dim]")
+        click.echo(
+            colorize(f"Instrumenting source files from: {source_dirs}", Colors.DIM)
+        )
 
     instrumented_dir, line_maps = setup_instrumented_environment(
         source_dirs, Path.cwd()
     )
 
     if verbose:
-        console.print(f"[dim]Instrumented {len(line_maps)} file(s)[/dim]\n")
+        click.echo(colorize(f"Instrumented {len(line_maps)} file(s)\n", Colors.DIM))
 
     return instrumented_dir, line_maps
 
@@ -98,7 +107,7 @@ def _run_test_session(
     # Generate reports
     if junit_xml:
         write_junit_xml(results, Path(junit_xml))
-        console.print(f"\nJUnit XML written to: {junit_xml}")
+        click.echo(f"\nJUnit XML written to: {junit_xml}")
 
     if coverage and cov_report:
         _generate_coverage_report(results, cov_report, config, line_maps)
@@ -145,7 +154,7 @@ def main(
         statatest tests/ --coverage --cov-report=lcov
     """
     if version:
-        console.print(f"statatest version {__version__}")
+        click.echo(f"statatest version {__version__}")
         sys.exit(0)
 
     if init:
@@ -153,12 +162,15 @@ def main(
         sys.exit(0)
 
     if ctx.invoked_subcommand is None and path is None:
-        console.print("[yellow]Usage: statatest <path> [OPTIONS][/yellow]")
-        console.print("Run 'statatest --help' for more information.")
+        click.echo(colorize("Usage: statatest <path> [OPTIONS]", Colors.YELLOW))
+        click.echo("Run 'statatest --help' for more information.")
         sys.exit(1)
 
     if path is None:
         return
+
+    # Configure logging
+    configure_logging(verbose)
 
     # Load configuration
     config = load_config(Path.cwd())
@@ -167,16 +179,16 @@ def main(
 
     # Discover tests
     test_path = Path(path)
-    console.print(f"[bold blue]statatest[/bold blue] v{__version__}")
-    console.print(f"Collecting tests from: {test_path}")
+    click.echo(colorize(f"statatest v{__version__}", Colors.BOLD + Colors.BLUE))
+    click.echo(f"Collecting tests from: {test_path}")
 
     tests = discover_tests(test_path, config, marker=marker, keyword=keyword)
 
     if not tests:
-        console.print("[yellow]No tests found.[/yellow]")
+        click.echo(colorize("No tests found.", Colors.YELLOW))
         sys.exit(0)
 
-    console.print(f"Found {len(tests)} test file(s)\n")
+    click.echo(f"Found {len(tests)} test file(s)\n")
 
     # Run test session and exit with appropriate code
     failed = _run_test_session(tests, config, coverage, cov_report, junit_xml, verbose)
@@ -200,11 +212,11 @@ lcov = "coverage.lcov"
 """
     config_path = Path.cwd() / "statatest.toml"
     if config_path.exists():
-        console.print("[yellow]statatest.toml already exists.[/yellow]")
+        click.echo(colorize("statatest.toml already exists.", Colors.YELLOW))
         return
 
     config_path.write_text(template)
-    console.print("[green]Created statatest.toml[/green]")
+    click.echo(colorize("Created statatest.toml", Colors.GREEN))
 
 
 def _generate_coverage_report(
@@ -221,7 +233,7 @@ def _generate_coverage_report(
         config: Configuration object.
         line_maps: Optional mapping of instrumented to original line numbers.
     """
-    from statatest.coverage import generate_html, generate_lcov
+    from statatest.coverage.reporter import generate_html, generate_lcov
 
     # TODO: Use line_maps to map instrumented line numbers back to original
     _ = line_maps  # Suppress unused warning for now
@@ -230,13 +242,15 @@ def _generate_coverage_report(
         case "lcov":
             lcov_path = Path(config.reporting.get("lcov", "coverage.lcov"))
             generate_lcov(results, lcov_path)
-            console.print(f"LCOV coverage written to: {lcov_path}")
+            click.echo(f"LCOV coverage written to: {lcov_path}")
         case "html":
             html_dir = Path(config.reporting.get("htmlcov", "htmlcov"))
             generate_html(results, html_dir)
-            console.print(f"HTML coverage written to: {html_dir}")
+            click.echo(f"HTML coverage written to: {html_dir}")
         case _:
-            console.print(f"[yellow]Unknown coverage format: {report_format}[/yellow]")
+            click.echo(
+                colorize(f"Unknown coverage format: {report_format}", Colors.YELLOW)
+            )
 
 
 def _print_summary(results: list[TestResult]) -> None:
@@ -245,22 +259,27 @@ def _print_summary(results: list[TestResult]) -> None:
     failed = sum(1 for r in results if not r.passed)
     total_time = sum(r.duration for r in results)
 
-    console.print()
-    console.print("=" * 60)
+    click.echo()
+    click.echo("=" * 60)
 
     if failed == 0:
-        console.print(f"[bold green]{passed} passed[/bold green] in {total_time:.2f}s")
+        click.echo(
+            colorize(f"{passed} passed", Colors.BOLD + Colors.GREEN)
+            + f" in {total_time:.2f}s"
+        )
     else:
-        console.print(
-            f"[bold red]{failed} failed[/bold red], "
-            f"[green]{passed} passed[/green] in {total_time:.2f}s"
+        click.echo(
+            colorize(f"{failed} failed", Colors.BOLD + Colors.RED)
+            + ", "
+            + colorize(f"{passed} passed", Colors.GREEN)
+            + f" in {total_time:.2f}s"
         )
 
         # Show failed tests
-        console.print("\n[bold red]FAILURES:[/bold red]")
+        click.echo("\n" + colorize("FAILURES:", Colors.BOLD + Colors.RED))
         for result in results:
             if not result.passed:
-                console.print(f"  - {result.test_file}: {result.error_message}")
+                click.echo(f"  - {result.test_file}: {result.error_message}")
 
 
 if __name__ == "__main__":

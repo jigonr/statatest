@@ -17,41 +17,25 @@ import re
 import shutil
 from pathlib import Path
 
-# Lines that should NOT be instrumented
-SKIP_PATTERNS = [
-    r"^\s*$",  # Empty lines
-    r"^\s*\*",  # Comment lines
-    r"^\s*//",  # Comment lines
-    r"^\s*/\*",  # Block comment start
-    r"^\s*\*/",  # Block comment end
-    r"^\s*program\s+define\s+",  # Program definition
-    r"^\s*program\s+drop\s+",  # Program drop
-    r"^\s*end\s*$",  # Program end
-    r"^\s*version\s+",  # Version statement
-    r"^\s*syntax\s+",  # Syntax statement
-    r"^\s*args\s+",  # Args statement
-    r"^\s*marksample\s+",  # Marksample
-    r"^\s*mata\s*:",  # Mata start
-    r"^\s*mata\s*$",  # Mata start
-    r"^\s*end\s+mata",  # Mata end
-    r"^\s*\{",  # Block start
-    r"^\s*\}",  # Block end
-]
+from statatest.core.constants import (
+    INSTRUMENT_SKIP_KEYWORDS,
+    INSTRUMENT_SKIP_PATTERNS,
+)
 
-SKIP_REGEX = re.compile("|".join(SKIP_PATTERNS), re.IGNORECASE)
+_SKIP_REGEX = re.compile("|".join(INSTRUMENT_SKIP_PATTERNS), re.IGNORECASE)
 
 
 def should_instrument_line(line: str) -> bool:
     """Check if a line should be instrumented.
 
     Args:
-        line: The source code line
+        line: The source code line.
 
     Returns:
-        True if the line should be instrumented
+        True if the line should be instrumented.
     """
     # Skip lines matching skip patterns
-    if SKIP_REGEX.match(line):
+    if _SKIP_REGEX.match(line):
         return False
 
     # Skip continuation lines (start with ///)
@@ -60,7 +44,7 @@ def should_instrument_line(line: str) -> bool:
 
     # Skip lines that are just closing braces or keywords
     stripped = line.strip().lower()
-    return stripped not in ("}", "else", "else {")
+    return stripped not in INSTRUMENT_SKIP_KEYWORDS
 
 
 def instrument_file(source_path: Path, dest_path: Path) -> dict[int, int]:
