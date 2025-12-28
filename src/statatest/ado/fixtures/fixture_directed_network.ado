@@ -1,10 +1,9 @@
-*! fixture_production_network.ado
+*! fixture_directed_network.ado
 *! Version 1.0.0
-*! Creates a sparse directed weighted production network for testing
-*! Based on Bernard & Zi (2022) elementary model
+*! Creates a sparse directed weighted network for testing
 *!
 *! Syntax:
-*!   fixture_production_network [, n_firms(#) n_edges(#) temporal seed(#)]
+*!   fixture_directed_network [, n_firms(#) n_edges(#) temporal seed(#)]
 *!
 *! Options:
 *!   n_firms(#)  - Total number of firms (default: 100)
@@ -25,7 +24,7 @@
 *!   - NOT bipartite: firms can be both buyers and sellers
 *!   - ~31% only buyers, ~13% only sellers, ~56% both
 
-program define fixture_production_network
+program define fixture_directed_network
     version 16
     
     syntax [, n_firms(integer 100) n_edges(integer 500) temporal seed(integer 12345)]
@@ -99,12 +98,5 @@ program define fixture_production_network
     return scalar n_buyers = `n_buyers'
 end
 
-// Alias for trade network (same structure, different domain)
-program define fixture_trade_network
-    fixture_production_network `0'
-end
+</antml9:parameter>
 
-// Alias for supply chain
-program define fixture_supply_chain
-    fixture_production_network `0'
-end

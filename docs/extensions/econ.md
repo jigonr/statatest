@@ -95,23 +95,21 @@ fixture_multilevel_panel [, n_groups(#) n_units(#) n_periods(#) ///
 
 ## Network Fixtures
 
-### fixture_production_network
+### fixture_directed_network
 
-Creates a sparse directed weighted network following Bernard & Zi (2022).
+Creates a sparse directed weighted network for testing.
 
 ```stata
-fixture_production_network [, n_firms(#) n_edges(#) temporal seed(#)]
+fixture_directed_network [, n_firms(#) n_edges(#) temporal seed(#)]
 ```
 
 **Structure:**
 
-- ~31% only buyers, ~13% only sellers, ~56% both
-- Log-normal transaction weights
-- Directed edges (seller → buyer)
+- Sparse connectivity
+- Log-normal edge weights
+- Directed edges (source → target)
 
 **Creates:** `seller`, `buyer`, `weight`, `year` (if temporal)
-
-**Aliases:** `fixture_trade_network`, `fixture_supply_chain`
 
 !!! note "Not Bipartite"
     Production networks are NOT bipartite—firms can be both buyers and sellers.
