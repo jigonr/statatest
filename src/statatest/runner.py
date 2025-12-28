@@ -69,6 +69,7 @@ def run_tests(
     config: Config,
     coverage: bool = False,
     verbose: bool = False,
+    instrumented_dir: Path | None = None,
 ) -> list[TestResult]:
     """Run all discovered tests.
 
@@ -77,6 +78,7 @@ def run_tests(
         config: Configuration object.
         coverage: Whether to collect coverage data.
         verbose: Whether to show verbose output.
+        instrumented_dir: Path to instrumented source files (for coverage).
 
     Returns:
         List of TestResult objects.
@@ -87,7 +89,7 @@ def run_tests(
         if verbose:
             console.print(f"Running: {test.relative_path}", end=" ")
 
-        result = _run_single_test(test, config, coverage)
+        result = _run_single_test(test, config, coverage, instrumented_dir)
         results.append(result)
 
         if verbose:
@@ -109,7 +111,10 @@ def run_tests(
 
 
 def _run_single_test(
-    test: TestFile, config: Config, coverage: bool = False
+    test: TestFile,
+    config: Config,
+    coverage: bool = False,
+    instrumented_dir: Path | None = None,
 ) -> TestResult:
     """Execute a single test file.
 
@@ -117,6 +122,7 @@ def _run_single_test(
         test: TestFile to execute.
         config: Configuration object.
         coverage: Whether to collect coverage data.
+        instrumented_dir: Path to instrumented source files (for coverage).
 
     Returns:
         TestResult with execution details.
@@ -132,7 +138,9 @@ def _run_single_test(
     conftest_files = discover_conftest(test.path.parent)
 
     # Create a wrapper .do file that sets up adopath and runs the test
-    wrapper_content = _create_wrapper_do(test.path, ado_paths, conftest_files)
+    wrapper_content = _create_wrapper_do(
+        test.path, ado_paths, conftest_files, instrumented_dir
+    )
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".do", delete=False
@@ -244,6 +252,7 @@ def _create_wrapper_do(
     test_path: Path,
     ado_paths: dict[str, Path],
     conftest_files: list[Path],
+    instrumented_dir: Path | None = None,
 ) -> str:
     """Create a wrapper .do file that sets up adopath and runs the test.
 
@@ -251,6 +260,7 @@ def _create_wrapper_do(
         test_path: Path to the test file.
         ado_paths: Dictionary of ado paths (assertions, fixtures).
         conftest_files: List of conftest.do files to load (in order).
+        instrumented_dir: Path to instrumented source files (for coverage).
 
     Returns:
         Contents of the wrapper .do file.
@@ -263,6 +273,12 @@ def _create_wrapper_do(
         "set more off",
         "",
     ]
+
+    # Add instrumented directory FIRST (so it takes precedence for coverage)
+    if instrumented_dir:
+        lines.append("// Add instrumented source files for coverage")
+        lines.append(f'adopath + "{instrumented_dir}"')
+        lines.append("")
 
     # Add ado paths to adopath
     for name, path in ado_paths.items():
