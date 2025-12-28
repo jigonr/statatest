@@ -1,0 +1,134 @@
+name: 'statatest'
+description: 'Run Stata tests with statatest - pytest-inspired testing for Stata'
+author: 'Jose Ignacio Gonzalez Rojas'
+
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  tests:
+    description: 'Path to test files or directory'
+    required: false
+    default: 'tests/'
+  stata-license:
+    description: 'Base64-encoded Stata license (from secrets.STATA_LIC_B64)'
+    required: true
+  coverage:
+    description: 'Enable coverage collection'
+    required: false
+    default: 'false'
+  cov-report:
+    description: 'Coverage report format (lcov, html)'
+    required: false
+    default: 'lcov'
+  junit-xml:
+    description: 'Path for JUnit XML output'
+    required: false
+    default: ''
+  marker:
+    description: 'Only run tests with this marker (-m)'
+    required: false
+    default: ''
+  keyword:
+    description: 'Only run tests matching keyword (-k)'
+    required: false
+    default: ''
+  verbose:
+    description: 'Enable verbose output'
+    required: false
+    default: 'false'
+  statatest-version:
+    description: 'Version of statatest to install (default: latest)'
+    required: false
+    default: ''
+
+outputs:
+  passed:
+    description: 'Number of tests passed'
+    value: ${{ steps.run-tests.outputs.passed }}
+  failed:
+    description: 'Number of tests failed'
+    value: ${{ steps.run-tests.outputs.failed }}
+  total:
+    description: 'Total number of tests'
+    value: ${{ steps.run-tests.outputs.total }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Stata license
+      shell: bash
+      run: |
+        echo "${{ inputs.stata-license }}" | base64 -d > /usr/local/stata/stata.lic
+        chmod 644 /usr/local/stata/stata.lic
+
+    - name: Install uv
+      shell: bash
+      run: |
+        if ! command -v uv &> /dev/null; then
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.local/bin:$PATH"
+        fi
+
+    - name: Install statatest
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.statatest-version }}" ]; then
+          uv tool install "statatest==${{ inputs.statatest-version }}"
+        else
+          uv tool install statatest
+        fi
+
+    - name: Build statatest command
+      id: build-command
+      shell: bash
+      run: |
+        CMD="statatest"
+        
+        # Add options before path
+        if [ "${{ inputs.coverage }}" = "true" ]; then
+          CMD="$CMD --coverage"
+          if [ -n "${{ inputs.cov-report }}" ]; then
+            CMD="$CMD --cov-report=${{ inputs.cov-report }}"
+          fi
+        fi
+        
+        if [ -n "${{ inputs.junit-xml }}" ]; then
+          CMD="$CMD --junit-xml=${{ inputs.junit-xml }}"
+        fi
+        
+        if [ -n "${{ inputs.marker }}" ]; then
+          CMD="$CMD -m ${{ inputs.marker }}"
+        fi
+        
+        if [ -n "${{ inputs.keyword }}" ]; then
+          CMD="$CMD -k ${{ inputs.keyword }}"
+        fi
+        
+        if [ "${{ inputs.verbose }}" = "true" ]; then
+          CMD="$CMD -v"
+        fi
+        
+        # Add path last
+        CMD="$CMD ${{ inputs.tests }}"
+        
+        echo "command=$CMD" >> $GITHUB_OUTPUT
+        echo "Running: $CMD"
+
+    - name: Run tests
+      id: run-tests
+      shell: bash
+      run: |
+        set +e
+        ${{ steps.build-command.outputs.command }}
+        EXIT_CODE=$?
+        set -e
+        
+        # Parse results from output (placeholder - actual parsing would need log analysis)
+        echo "passed=0" >> $GITHUB_OUTPUT
+        echo "failed=0" >> $GITHUB_OUTPUT
+        echo "total=0" >> $GITHUB_OUTPUT
+        
+        exit $EXIT_CODE
