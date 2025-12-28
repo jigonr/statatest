@@ -10,6 +10,8 @@ from statatest.execution import run_tests
 from statatest.execution.executor import _get_ado_paths
 from statatest.execution.parser import (
     extract_error_message as _extract_error_message,
+)
+from statatest.execution.parser import (
     parse_coverage_markers as _parse_coverage_markers,
 )
 from statatest.execution.wrapper import create_wrapper_do as _create_wrapper_do

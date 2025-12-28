@@ -3,6 +3,7 @@
 import tempfile
 from pathlib import Path
 
+from statatest.core.models import TestFile
 from statatest.fixtures import (
     Fixture,
     FixtureManager,
@@ -10,7 +11,6 @@ from statatest.fixtures import (
     get_test_fixtures,
     parse_conftest,
 )
-from statatest.core.models import TestFile
 
 
 def test_fixture_dataclass():
