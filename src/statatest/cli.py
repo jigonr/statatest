@@ -17,12 +17,12 @@ import click
 from statatest import __version__
 from statatest.core.config import Config, load_config
 from statatest.core.logging import Colors, colorize, configure_logging
-from statatest.discovery import discover_tests
-from statatest.execution import run_tests
-from statatest.instrument import (
+from statatest.coverage.instrument import (
     cleanup_instrumented_environment,
     setup_instrumented_environment,
 )
+from statatest.discovery import discover_tests
+from statatest.execution import run_tests
 from statatest.reporting import write_junit_xml
 
 if TYPE_CHECKING:

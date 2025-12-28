@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from statatest.instrument import (
+from statatest.coverage.instrument import (
     cleanup_instrumented_environment,
     get_total_lines,
     instrument_directory,
