@@ -10,20 +10,18 @@ from __future__ import annotations
 import contextlib
 import importlib.resources
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
 
-from rich.console import Console
-
 from statatest.core.config import Config
+from statatest.core.logging import Colors, colorize
 from statatest.core.models import TestFile, TestResult
 from statatest.execution.models import StataOutput, TestEnvironment
 from statatest.execution.parser import parse_test_output
 from statatest.execution.wrapper import create_wrapper_do
 from statatest.fixtures import discover_conftest
-
-_console = Console()
 
 
 def run_tests(
@@ -49,7 +47,8 @@ def run_tests(
 
     for test in tests:
         if verbose:
-            _console.print(f"Running: {test.relative_path}", end=" ")
+            sys.stdout.write(f"Running: {test.relative_path} ")
+            sys.stdout.flush()
 
         result = _run_single_test(test, config, coverage, instrumented_dir)
         results.append(result)
@@ -57,7 +56,8 @@ def run_tests(
         _print_result(result, verbose)
 
     if not verbose:
-        _console.print()  # Newline after dots
+        sys.stdout.write("\n")  # Newline after dots
+        sys.stdout.flush()
 
     return results
 
@@ -287,11 +287,12 @@ def _print_result(result: TestResult, verbose: bool) -> None:
     """
     if verbose:
         if result.passed:
-            _console.print("[green]PASSED[/green]", end="")
+            sys.stdout.write(colorize("PASSED", Colors.GREEN))
         else:
-            _console.print("[red]FAILED[/red]", end="")
-        _console.print(f" ({result.duration:.2f}s)")
+            sys.stdout.write(colorize("FAILED", Colors.RED))
+        sys.stdout.write(f" ({result.duration:.2f}s)\n")
     elif result.passed:
-        _console.print("[green].[/green]", end="")
+        sys.stdout.write(colorize(".", Colors.GREEN))
     else:
-        _console.print("[red]F[/red]", end="")
+        sys.stdout.write(colorize("F", Colors.RED))
+    sys.stdout.flush()
