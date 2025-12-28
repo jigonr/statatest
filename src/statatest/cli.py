@@ -12,13 +12,105 @@ from rich.console import Console
 from statatest import __version__
 from statatest.config import Config, load_config
 from statatest.discovery import discover_tests
+from statatest.instrument import (
+    cleanup_instrumented_environment,
+    setup_instrumented_environment,
+)
 from statatest.report import write_junit_xml
 from statatest.runner import run_tests
 
 if TYPE_CHECKING:
-    from statatest.models import TestResult
+    from statatest.models import TestFile, TestResult
 
 console = Console()
+
+
+def _setup_coverage(
+    config: Config, verbose: bool
+) -> tuple[Path | None, dict[str, dict[int, int]]]:
+    """Set up coverage instrumentation if source directories are configured.
+
+    Args:
+        config: Configuration object with coverage_source paths.
+        verbose: Whether to print verbose output.
+
+    Returns:
+        Tuple of (instrumented_dir, line_maps). Both are None/empty if no sources.
+    """
+    source_dirs = [Path(p) for p in config.coverage_source]
+    if not source_dirs:
+        console.print(
+            "[yellow]Warning: --coverage enabled but no coverage.source "
+            "configured in statatest.toml[/yellow]"
+        )
+        return None, {}
+
+    if verbose:
+        console.print(f"[dim]Instrumenting source files from: {source_dirs}[/dim]")
+
+    instrumented_dir, line_maps = setup_instrumented_environment(
+        source_dirs, Path.cwd()
+    )
+
+    if verbose:
+        console.print(f"[dim]Instrumented {len(line_maps)} file(s)[/dim]\n")
+
+    return instrumented_dir, line_maps
+
+
+def _run_test_session(
+    tests: list[TestFile],
+    config: Config,
+    coverage: bool,
+    cov_report: str | None,
+    junit_xml: str | None,
+    verbose: bool,
+) -> int:
+    """Execute tests and generate reports.
+
+    Args:
+        tests: List of test files to run.
+        config: Configuration object.
+        coverage: Whether coverage collection is enabled.
+        cov_report: Coverage report format (lcov, html) or None.
+        junit_xml: Path for JUnit XML output or None.
+        verbose: Whether to print verbose output.
+
+    Returns:
+        Number of failed tests.
+    """
+    # Set up coverage instrumentation if enabled
+    instrumented_dir: Path | None = None
+    line_maps: dict[str, dict[int, int]] = {}
+
+    if coverage:
+        instrumented_dir, line_maps = _setup_coverage(config, verbose)
+
+    # Run tests
+    results = run_tests(
+        tests,
+        config,
+        coverage=coverage,
+        verbose=verbose,
+        instrumented_dir=instrumented_dir,
+    )
+
+    # Generate reports
+    if junit_xml:
+        write_junit_xml(results, Path(junit_xml))
+        console.print(f"\nJUnit XML written to: {junit_xml}")
+
+    if coverage and cov_report:
+        _generate_coverage_report(results, cov_report, config, line_maps)
+
+    # Clean up instrumented files
+    if instrumented_dir:
+        cleanup_instrumented_environment(Path.cwd())
+
+    # Print summary
+    _print_summary(results)
+
+    return sum(1 for r in results if not r.passed)
 
 
 @click.group(invoke_without_command=True)
@@ -86,22 +178,8 @@ def main(
 
     console.print(f"Found {len(tests)} test file(s)\n")
 
-    # Run tests
-    results = run_tests(tests, config, coverage=coverage, verbose=verbose)
-
-    # Generate reports
-    if junit_xml:
-        write_junit_xml(results, Path(junit_xml))
-        console.print(f"\nJUnit XML written to: {junit_xml}")
-
-    if coverage and cov_report:
-        _generate_coverage_report(results, cov_report, config)
-
-    # Print summary
-    _print_summary(results)
-
-    # Exit with appropriate code
-    failed = sum(1 for r in results if not r.passed)
+    # Run test session and exit with appropriate code
+    failed = _run_test_session(tests, config, coverage, cov_report, junit_xml, verbose)
     sys.exit(1 if failed > 0 else 0)
 
 
@@ -130,10 +208,23 @@ lcov = "coverage.lcov"
 
 
 def _generate_coverage_report(
-    results: list[TestResult], report_format: str, config: Config
+    results: list[TestResult],
+    report_format: str,
+    config: Config,
+    line_maps: dict[str, dict[int, int]] | None = None,
 ) -> None:
-    """Generate coverage report in the specified format."""
+    """Generate coverage report in the specified format.
+
+    Args:
+        results: List of test results with coverage data.
+        report_format: Output format ('lcov' or 'html').
+        config: Configuration object.
+        line_maps: Optional mapping of instrumented to original line numbers.
+    """
     from statatest.coverage import generate_html, generate_lcov
+
+    # TODO: Use line_maps to map instrumented line numbers back to original
+    _ = line_maps  # Suppress unused warning for now
 
     match report_format.lower():
         case "lcov":

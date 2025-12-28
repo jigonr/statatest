@@ -86,7 +86,9 @@ jobs:
       github.event_name == 'schedule' ||
       (github.event_name == 'workflow_dispatch' && inputs.run_stata_tests == 'true')
     container:
-      image: dataeditors/stata18:latest
+      # Use pinned version from AEA Data Editor's Docker images
+      # See: https://hub.docker.com/r/dataeditors/stata18_5-mp/tags
+      image: dataeditors/stata18_5-mp:2025-02-26
       options: --user root
 
     steps:
