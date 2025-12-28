@@ -46,6 +46,7 @@ nav:
       - Troubleshooting: guide/troubleshooting.md
   - CI Integration:
       - GitHub Actions: ci/github-actions.md
+      - statatest Action: ci/action.md
       - Docker: ci/docker.md
       - Codecov: ci/codecov.md
   - Extensions:
