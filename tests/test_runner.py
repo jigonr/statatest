@@ -58,7 +58,7 @@ class TestCreateWrapperDo:
         wrapper = _create_wrapper_do(test_path, ado_paths, conftest_files)
 
         assert 'adopath + "/pkg/ado/assertions"' in wrapper
-        assert "// Add assertions path" in wrapper
+        assert "// Additional ado paths" in wrapper
 
     def test_includes_conftest_files(self):
         """Test that conftest.do files are loaded."""
@@ -75,7 +75,7 @@ class TestCreateWrapperDo:
         assert 'do "/project/tests/conftest.do"' in wrapper
 
     def test_includes_instrumented_dir(self):
-        """Test that instrumented directory is added first."""
+        """Test that instrumented directory is added first (highest priority)."""
         test_path = Path("/project/tests/test_example.do")
         ado_paths = {"assertions": Path("/pkg/ado/assertions")}
         conftest_files = []
@@ -85,8 +85,8 @@ class TestCreateWrapperDo:
             test_path, ado_paths, conftest_files, instrumented_dir
         )
 
-        # Instrumented dir should be added first
-        assert "// Add instrumented source files for coverage" in wrapper
+        # Instrumented dir should be added first with coverage comment
+        assert "// Instrumented source files for coverage" in wrapper
         assert 'adopath + "/project/.statatest/instrumented"' in wrapper
 
         # And should appear before other ado paths

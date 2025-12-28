@@ -179,7 +179,7 @@ def _run_single_test(
         TestResult with execution details.
     """
     # Phase 1: Prepare environment (I/O)
-    env = _prepare_test_environment(test, coverage, instrumented_dir)
+    env = _prepare_test_environment(test, config, coverage, instrumented_dir)
 
     try:
         # Phase 2: Execute Stata (I/O)
@@ -213,6 +213,7 @@ def _run_single_test(
 
 def _prepare_test_environment(
     test: TestFile,
+    config: Config,
     coverage: bool,
     instrumented_dir: Path | None,
 ) -> TestEnvironment:
@@ -220,14 +221,15 @@ def _prepare_test_environment(
 
     Args:
         test: TestFile to execute.
+        config: Configuration object with adopath settings.
         coverage: Whether coverage collection is enabled.
         instrumented_dir: Path to instrumented source files.
 
     Returns:
         TestEnvironment with paths to temporary files.
     """
-    # Get paths to .ado files (assertions and fixtures)
-    ado_paths = _get_ado_paths()
+    # Get paths to .ado files based on adopath_mode
+    ado_paths = _get_ado_paths_for_mode(config)
 
     # Find conftest.do files in directory hierarchy
     from statatest.fixtures import discover_conftest
@@ -236,7 +238,11 @@ def _prepare_test_environment(
 
     # Create wrapper .do file
     wrapper_content = _create_wrapper_do(
-        test.path, ado_paths, conftest_files, instrumented_dir
+        test_path=test.path,
+        ado_paths=ado_paths,
+        conftest_files=conftest_files,
+        instrumented_dir=instrumented_dir,
+        setup_do=config.setup_do,
     )
 
     with tempfile.NamedTemporaryFile(
@@ -253,6 +259,33 @@ def _prepare_test_environment(
         log_path = Path(log_file.name)
 
     return TestEnvironment(wrapper_path=wrapper_path, log_path=log_path)
+
+
+def _get_ado_paths_for_mode(config: Config) -> dict[str, Path]:
+    """Get ado paths based on configuration mode.
+
+    Args:
+        config: Configuration with adopath_mode and adopath settings.
+
+    Returns:
+        Dictionary of ado paths to add. Empty dict if user manages paths.
+    """
+    if config.adopath_mode == "none":
+        # User manages adopath - don't inject anything
+        return {}
+
+    if config.adopath_mode == "custom":
+        # Only use paths from config, not statatest internal paths
+        return {f"custom_{i}": Path(p) for i, p in enumerate(config.adopath)}
+
+    # Default "auto" mode: add statatest paths + any custom paths
+    paths = _get_ado_paths()
+
+    # Add any user-specified custom paths
+    for i, custom_path in enumerate(config.adopath):
+        paths[f"custom_{i}"] = Path(custom_path)
+
+    return paths
 
 
 def _execute_stata(
@@ -381,49 +414,69 @@ def _create_wrapper_do(
     ado_paths: dict[str, Path],
     conftest_files: list[Path],
     instrumented_dir: Path | None = None,
+    setup_do: str | None = None,
 ) -> str:
-    """Create a wrapper .do file that sets up adopath and runs the test.
+    """Create a wrapper .do file that sets up the environment and runs the test.
+
+    The wrapper executes in this order:
+    1. Clear and set Stata options
+    2. Add instrumented directory (for coverage) - highest priority
+    3. Add ado paths (if adopath_mode is not "none")
+    4. Run setup_do (if configured)
+    5. Load conftest.do files (fixtures and shared setup)
+    6. Run the actual test
 
     Args:
         test_path: Path to the test file.
-        ado_paths: Dictionary of ado paths (assertions, fixtures).
+        ado_paths: Dictionary of ado paths to add. May be empty if user manages paths.
         conftest_files: List of conftest.do files to load (in order).
         instrumented_dir: Path to instrumented source files (for coverage).
+        setup_do: Optional path to a setup.do file for custom initialization.
 
     Returns:
         Contents of the wrapper .do file.
     """
     lines = [
         "// Auto-generated wrapper by statatest",
-        "// Sets up adopath for assertion and fixture functions",
+        "// Test environment setup and execution",
         "",
         "clear all",
         "set more off",
         "",
     ]
 
-    # Add instrumented directory FIRST (so it takes precedence for coverage)
+    # Add instrumented directory FIRST (highest priority for coverage)
     if instrumented_dir:
-        lines.append("// Add instrumented source files for coverage")
+        lines.append("// Instrumented source files for coverage (highest priority)")
         lines.append(f'adopath + "{instrumented_dir}"')
         lines.append("")
 
-    # Add ado paths to adopath
-    for name, path in ado_paths.items():
-        lines.append(f"// Add {name} path")
-        lines.append(f'adopath + "{path}"')
+    # Add ado paths (may be empty if adopath_mode is "none")
+    if ado_paths:
+        lines.append("// Additional ado paths")
+        for name, path in ado_paths.items():
+            # Skip internal naming, just add the path with a clean comment
+            comment = name.replace("_", " ").replace("custom ", "user: ")
+            lines.append(f"// {comment}")
+            lines.append(f'adopath + "{path}"')
+        lines.append("")
+
+    # Run user's setup.do if configured (before conftest)
+    if setup_do:
+        lines.append("// User-defined setup script")
+        lines.append(f'do "{setup_do}"')
         lines.append("")
 
     # Load conftest.do files (root first, then closer to test)
     if conftest_files:
-        lines.append("// Load conftest.do files (fixtures and shared setup)")
+        lines.append("// Conftest files (fixtures and shared setup)")
         lines.extend(f'do "{conftest}"' for conftest in conftest_files)
         lines.append("")
 
     # Run the actual test
     lines.extend(
         [
-            "// Run the test file",
+            "// Execute test",
             f'do "{test_path}"',
             "",
         ]

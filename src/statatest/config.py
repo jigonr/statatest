@@ -25,6 +25,12 @@ class Config:
         stata_executable: Path or name of Stata executable.
         timeout: Timeout in seconds for each test file.
         verbose: Whether to show verbose output.
+        adopath_mode: How to handle ado path setup:
+            - "auto": Add statatest assertions/fixtures to adopath (default)
+            - "none": User manages adopath (packages already installed)
+            - "custom": Use only paths from adopath list
+        adopath: Additional paths to add to Stata's adopath.
+        setup_do: Path to a setup.do file to run before each test.
         coverage_source: Directories containing source files for coverage.
         coverage_omit: Patterns for files to exclude from coverage.
         reporting: Reporting configuration (junit_xml, lcov paths).
@@ -37,6 +43,9 @@ class Config:
     stata_executable: str = DEFAULT_STATA_EXECUTABLE
     timeout: int = DEFAULT_TIMEOUT_SECONDS
     verbose: bool = False
+    adopath_mode: str = "auto"
+    adopath: list[str] = field(default_factory=list)
+    setup_do: str | None = None
     coverage_source: list[str] = field(default_factory=list)
     coverage_omit: list[str] = field(default_factory=list)
     reporting: dict[str, str] = field(default_factory=dict)
@@ -90,7 +99,14 @@ def _apply_settings(config: Config, settings: dict[str, Any]) -> None:
         config: Config object to modify.
         settings: Dictionary of settings from TOML file.
     """
-    # Core settings
+    _apply_core_settings(config, settings)
+    _apply_adopath_settings(config, settings)
+    _apply_coverage_settings(config, settings)
+    config.reporting = settings.get("reporting", {})
+
+
+def _apply_core_settings(config: Config, settings: dict[str, Any]) -> None:
+    """Apply core settings (testpaths, executable, timeout, verbose)."""
     if "testpaths" in settings:
         config.testpaths = settings["testpaths"]
     if "test_files" in settings:
@@ -102,12 +118,21 @@ def _apply_settings(config: Config, settings: dict[str, Any]) -> None:
     if "verbose" in settings:
         config.verbose = settings["verbose"]
 
-    # Coverage settings
+
+def _apply_adopath_settings(config: Config, settings: dict[str, Any]) -> None:
+    """Apply adopath settings (mode, custom paths, setup_do)."""
+    if "adopath_mode" in settings:
+        config.adopath_mode = settings["adopath_mode"]
+    if "adopath" in settings:
+        config.adopath = settings["adopath"]
+    if "setup_do" in settings:
+        config.setup_do = settings["setup_do"]
+
+
+def _apply_coverage_settings(config: Config, settings: dict[str, Any]) -> None:
+    """Apply coverage settings (source, omit)."""
     coverage = settings.get("coverage", {})
     if "source" in coverage:
         config.coverage_source = coverage["source"]
     if "omit" in coverage:
         config.coverage_omit = coverage["omit"]
-
-    # Reporting settings
-    config.reporting = settings.get("reporting", {})
