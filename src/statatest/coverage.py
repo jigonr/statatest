@@ -13,15 +13,12 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from statatest.constants import COVERAGE_HIGH_THRESHOLD, COVERAGE_MEDIUM_THRESHOLD
 from statatest.models import TestResult
 
 # Pattern to extract coverage markers from SMCL logs
 # Format: {* COV:filename:lineno }
 COVERAGE_PATTERN = re.compile(r"\{\*\s*COV:([^:]+):(\d+)\s*\}")
-
-# Coverage thresholds for HTML report styling
-COVERAGE_HIGH_THRESHOLD = 80
-COVERAGE_MEDIUM_THRESHOLD = 50
 
 
 @dataclass

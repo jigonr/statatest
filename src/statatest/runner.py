@@ -1,4 +1,10 @@
-"""Test runner for statatest - executes Stata tests via subprocess."""
+"""Test runner for statatest - executes Stata tests via subprocess.
+
+Architecture follows I/O separation principle:
+- _prepare_test_environment(): I/O (file creation)
+- _execute_stata(): I/O (subprocess call)
+- _parse_test_output(): Computation (result parsing)
+"""
 
 from __future__ import annotations
 
@@ -8,14 +14,63 @@ import re
 import subprocess
 import tempfile
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 from rich.console import Console
 
 from statatest.config import Config
+from statatest.constants import ERROR_MESSAGE_MAX_LENGTH
 from statatest.models import TestFile, TestResult
 
 console = Console()
+
+# =============================================================================
+# Regex Patterns (compiled once at module load)
+# =============================================================================
+
+# Pattern to extract coverage markers from SMCL logs
+# Format: {* COV:filename:lineno }
+COVERAGE_PATTERN = re.compile(r"\{\*\s*COV:([^:]+):(\d+)\s*\}")
+
+# Pattern to extract test markers from output
+PASS_PATTERN = re.compile(r"_STATATEST_PASS_:(\w+)_")
+FAIL_PATTERN = re.compile(r"_STATATEST_FAIL_:(\w+)_:(.+?)_END_")
+
+# Stata error patterns for message extraction
+ERROR_PATTERNS = [
+    re.compile(r"r\((\d+)\);"),  # Stata return codes
+    re.compile(r"assertion is false", re.IGNORECASE),  # Assert failures
+    re.compile(r"^error:?\s*(.+)$", re.MULTILINE | re.IGNORECASE),  # Generic errors
+]
+
+
+# =============================================================================
+# Data Classes for Internal State
+# =============================================================================
+
+
+@dataclass
+class TestEnvironment:
+    """Temporary files created for test execution."""
+
+    wrapper_path: Path
+    log_path: Path
+
+
+@dataclass
+class StataOutput:
+    """Raw output from Stata subprocess."""
+
+    returncode: int
+    log_content: str
+    stderr: str
+    duration: float
+
+
+# =============================================================================
+# Path Discovery
+# =============================================================================
 
 
 def _get_ado_paths() -> dict[str, Path]:
@@ -53,15 +108,6 @@ def _get_ado_paths() -> dict[str, Path]:
                 paths[subdir] = subpath
 
     return paths
-
-
-# Pattern to extract coverage markers from SMCL logs
-# Format: {* COV:filename:lineno }
-COVERAGE_PATTERN = re.compile(r"\{\*\s*COV:([^:]+):(\d+)\s*\}")
-
-# Pattern to extract test markers from output
-PASS_PATTERN = re.compile(r"_STATATEST_PASS_:(\w+)_")
-FAIL_PATTERN = re.compile(r"_STATATEST_FAIL_:(\w+)_:(.+?)_END_")
 
 
 def run_tests(
@@ -118,6 +164,11 @@ def _run_single_test(
 ) -> TestResult:
     """Execute a single test file.
 
+    This function orchestrates three phases:
+    1. Prepare environment (I/O) - create wrapper files
+    2. Execute Stata (I/O) - run subprocess
+    3. Parse results (computation) - analyze output
+
     Args:
         test: TestFile to execute.
         config: Configuration object.
@@ -127,8 +178,54 @@ def _run_single_test(
     Returns:
         TestResult with execution details.
     """
-    start_time = time.time()
+    # Phase 1: Prepare environment (I/O)
+    env = _prepare_test_environment(test, coverage, instrumented_dir)
 
+    try:
+        # Phase 2: Execute Stata (I/O)
+        output = _execute_stata(test, config, env, coverage)
+
+        # Phase 3: Parse results (computation)
+        return _parse_test_output(test, output, coverage)
+
+    except subprocess.TimeoutExpired:
+        return TestResult(
+            test_file=test.relative_path,
+            passed=False,
+            duration=0.0,
+            rc=-1,
+            error_message=f"Test timed out after {config.timeout} seconds",
+        )
+
+    except FileNotFoundError:
+        return TestResult(
+            test_file=test.relative_path,
+            passed=False,
+            duration=0.0,
+            rc=-1,
+            error_message=f"Stata executable not found: {config.stata_executable}",
+        )
+
+    finally:
+        # Clean up temporary files
+        _cleanup_environment(env)
+
+
+def _prepare_test_environment(
+    test: TestFile,
+    coverage: bool,
+    instrumented_dir: Path | None,
+) -> TestEnvironment:
+    """Prepare temporary files for test execution (I/O phase).
+
+    Args:
+        test: TestFile to execute.
+        coverage: Whether coverage collection is enabled.
+        instrumented_dir: Path to instrumented source files.
+
+    Returns:
+        TestEnvironment with paths to temporary files.
+    """
     # Get paths to .ado files (assertions and fixtures)
     ado_paths = _get_ado_paths()
 
@@ -137,7 +234,7 @@ def _run_single_test(
 
     conftest_files = discover_conftest(test.path.parent)
 
-    # Create a wrapper .do file that sets up adopath and runs the test
+    # Create wrapper .do file
     wrapper_content = _create_wrapper_do(
         test.path, ado_paths, conftest_files, instrumented_dir
     )
@@ -148,104 +245,135 @@ def _run_single_test(
         wrapper_file.write(wrapper_content)
         wrapper_path = Path(wrapper_file.name)
 
-    # Use SMCL log format for coverage marker parsing
+    # Create log file
     log_suffix = ".smcl" if coverage else ".log"
-
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=log_suffix, delete=False
     ) as log_file:
         log_path = Path(log_file.name)
 
-    # Build Stata command
-    # Use -s for SMCL log, -b for plain text log
+    return TestEnvironment(wrapper_path=wrapper_path, log_path=log_path)
+
+
+def _execute_stata(
+    test: TestFile,
+    config: Config,
+    env: TestEnvironment,
+    coverage: bool,
+) -> StataOutput:
+    """Execute Stata subprocess (I/O phase).
+
+    Args:
+        test: TestFile being executed.
+        config: Configuration object.
+        env: Test environment with temporary file paths.
+        coverage: Whether coverage collection is enabled.
+
+    Returns:
+        StataOutput with raw subprocess results.
+
+    Raises:
+        subprocess.TimeoutExpired: If test exceeds timeout.
+        FileNotFoundError: If Stata executable not found.
+    """
+    start_time = time.time()
+
+    # Use -s for SMCL log (coverage), -b for plain text log
     log_flag = "-s" if coverage else "-b"
 
+    cmd = [
+        config.stata_executable,
+        log_flag,
+        "-q",  # Quiet mode (suppress logo)
+        "do",
+        str(env.wrapper_path),
+    ]
+
+    process = subprocess.run(
+        cmd,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=config.timeout,
+        cwd=test.path.parent,
+    )
+
+    duration = time.time() - start_time
+
+    # Read log file
     try:
-        # Run Stata in batch mode
-        cmd = [
-            config.stata_executable,
-            log_flag,
-            "-q",  # Quiet mode (suppress logo)
-            "do",
-            str(wrapper_path),
-        ]
-
-        process = subprocess.run(
-            cmd,
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=300,  # 5 minute timeout per test
-            cwd=test.path.parent,
-        )
-
-        duration = time.time() - start_time
-
-        # Read log file
-        try:
-            log_content = log_path.read_text(encoding="utf-8")
-        except FileNotFoundError:
-            log_content = ""
-
-        # Parse results
-        rc = process.returncode
-        passed = rc == 0
-
-        # Check for assertion failures in output
-        assertions_passed = len(PASS_PATTERN.findall(log_content))
-        assertions_failed = len(FAIL_PATTERN.findall(log_content))
-
-        if assertions_failed > 0:
-            passed = False
-
-        # Extract error message
-        error_message = ""
-        if not passed:
-            error_message = _extract_error_message(log_content, process.stderr)
-
-        # Extract coverage data
-        coverage_hits: dict[str, set[int]] = {}
-        if coverage:
-            coverage_hits = _parse_coverage_markers(log_content)
-
-        return TestResult(
-            test_file=test.relative_path,
-            passed=passed,
-            duration=duration,
-            rc=rc,
-            stdout=log_content,
-            stderr=process.stderr,
-            error_message=error_message,
-            assertions_passed=assertions_passed,
-            assertions_failed=assertions_failed,
-            coverage_hits=coverage_hits,
-        )
-
-    except subprocess.TimeoutExpired:
-        duration = time.time() - start_time
-        return TestResult(
-            test_file=test.relative_path,
-            passed=False,
-            duration=duration,
-            rc=-1,
-            error_message="Test timed out after 300 seconds",
-        )
-
+        log_content = env.log_path.read_text(encoding="utf-8")
     except FileNotFoundError:
-        duration = time.time() - start_time
-        return TestResult(
-            test_file=test.relative_path,
-            passed=False,
-            duration=duration,
-            rc=-1,
-            error_message=f"Stata executable not found: {config.stata_executable}",
-        )
+        log_content = ""
 
-    finally:
-        # Clean up temporary files
-        for path in [log_path, wrapper_path]:
-            with contextlib.suppress(FileNotFoundError):
-                path.unlink()
+    return StataOutput(
+        returncode=process.returncode,
+        log_content=log_content,
+        stderr=process.stderr,
+        duration=duration,
+    )
+
+
+def _parse_test_output(
+    test: TestFile,
+    output: StataOutput,
+    coverage: bool,
+) -> TestResult:
+    """Parse Stata output into TestResult (computation phase).
+
+    This is a pure function with no I/O - only string parsing.
+
+    Args:
+        test: TestFile that was executed.
+        output: Raw output from Stata subprocess.
+        coverage: Whether to parse coverage markers.
+
+    Returns:
+        TestResult with parsed execution details.
+    """
+    # Check return code
+    passed = output.returncode == 0
+
+    # Count assertion markers
+    assertions_passed = len(PASS_PATTERN.findall(output.log_content))
+    assertions_failed = len(FAIL_PATTERN.findall(output.log_content))
+
+    if assertions_failed > 0:
+        passed = False
+
+    # Extract error message if failed
+    error_message = ""
+    if not passed:
+        error_message = _extract_error_message(output.log_content, output.stderr)
+
+    # Parse coverage markers
+    coverage_hits: dict[str, set[int]] = {}
+    if coverage:
+        coverage_hits = _parse_coverage_markers(output.log_content)
+
+    return TestResult(
+        test_file=test.relative_path,
+        passed=passed,
+        duration=output.duration,
+        rc=output.returncode,
+        stdout=output.log_content,
+        stderr=output.stderr,
+        error_message=error_message,
+        assertions_passed=assertions_passed,
+        assertions_failed=assertions_failed,
+        coverage_hits=coverage_hits,
+    )
+
+
+def _cleanup_environment(env: TestEnvironment) -> None:
+    """Clean up temporary files (I/O phase).
+
+    Args:
+        env: Test environment with paths to clean up.
+    """
+    for path in [env.log_path, env.wrapper_path]:
+        with contextlib.suppress(FileNotFoundError):
+            path.unlink()
 
 
 def _create_wrapper_do(
@@ -305,24 +433,26 @@ def _create_wrapper_do(
 
 
 def _extract_error_message(log_content: str, stderr: str) -> str:
-    """Extract error message from Stata output."""
-    # Look for Stata error patterns
-    error_patterns = [
-        r"r\((\d+)\);",  # Stata return codes
-        r"assertion is false",  # Assert failures
-        r"^error:?\s*(.+)$",  # Generic error lines
-    ]
+    """Extract error message from Stata output (computation).
 
-    for pattern in error_patterns:
-        match = re.search(pattern, log_content, re.MULTILINE | re.IGNORECASE)
+    This is a pure function - only string processing, no I/O.
+
+    Args:
+        log_content: Stata log file content.
+        stderr: Standard error output.
+
+    Returns:
+        Human-readable error message.
+    """
+    # Try each error pattern
+    for pattern in ERROR_PATTERNS:
+        match = pattern.search(log_content)
         if match:
-            if match.groups():
-                return match.group(0)
             return match.group(0)
 
-    # Check stderr
+    # Fall back to stderr (truncated)
     if stderr.strip():
-        return stderr.strip()[:200]
+        return stderr.strip()[:ERROR_MESSAGE_MAX_LENGTH]
 
     # Generic failure message
     return "Test failed (check log for details)"

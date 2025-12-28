@@ -7,14 +7,35 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from statatest.constants import (
+    DEFAULT_STATA_EXECUTABLE,
+    DEFAULT_TEST_FILE_PATTERNS,
+    DEFAULT_TEST_PATHS,
+    DEFAULT_TIMEOUT_SECONDS,
+)
+
 
 @dataclass
 class Config:
-    """Configuration for statatest."""
+    """Configuration for statatest.
 
-    testpaths: list[str] = field(default_factory=lambda: ["tests"])
-    test_files: list[str] = field(default_factory=lambda: ["test_*.do"])
-    stata_executable: str = "stata-mp"
+    Attributes:
+        testpaths: Directories to search for test files.
+        test_files: Glob patterns for test file names.
+        stata_executable: Path or name of Stata executable.
+        timeout: Timeout in seconds for each test file.
+        verbose: Whether to show verbose output.
+        coverage_source: Directories containing source files for coverage.
+        coverage_omit: Patterns for files to exclude from coverage.
+        reporting: Reporting configuration (junit_xml, lcov paths).
+    """
+
+    testpaths: list[str] = field(default_factory=lambda: list(DEFAULT_TEST_PATHS))
+    test_files: list[str] = field(
+        default_factory=lambda: list(DEFAULT_TEST_FILE_PATTERNS)
+    )
+    stata_executable: str = DEFAULT_STATA_EXECUTABLE
+    timeout: int = DEFAULT_TIMEOUT_SECONDS
     verbose: bool = False
     coverage_source: list[str] = field(default_factory=list)
     coverage_omit: list[str] = field(default_factory=list)
@@ -63,13 +84,21 @@ def _load_toml(path: Path) -> dict[str, Any]:
 
 
 def _apply_settings(config: Config, settings: dict[str, Any]) -> None:
-    """Apply settings dictionary to config object."""
+    """Apply settings dictionary to config object.
+
+    Args:
+        config: Config object to modify.
+        settings: Dictionary of settings from TOML file.
+    """
+    # Core settings
     if "testpaths" in settings:
         config.testpaths = settings["testpaths"]
     if "test_files" in settings:
         config.test_files = settings["test_files"]
     if "stata_executable" in settings:
         config.stata_executable = settings["stata_executable"]
+    if "timeout" in settings:
+        config.timeout = settings["timeout"]
     if "verbose" in settings:
         config.verbose = settings["verbose"]
 
