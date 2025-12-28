@@ -43,6 +43,10 @@ coverage.xml
 *.cover
 .hypothesis/
 
+# Linters
+.mypy_cache/
+.ruff_cache/
+
 # Stata
 *.log
 *.smcl

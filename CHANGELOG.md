@@ -9,22 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **[econ] extension** - Economic data fixtures and assertions (`pip install statatest[econ]`)
-  - Panel fixtures:
-    - `fixture_balanced_panel` - Balanced firm-year panel
-    - `fixture_unbalanced_panel` - Panel with attrition, entry, gaps
-    - `fixture_multilevel_panel` - Hierarchical panel (group × unit × year)
-  - Network fixtures:
-    - `fixture_production_network` - Sparse directed weighted network (Bernard & Zi 2022)
-    - `fixture_bipartite_network` - AKM employer-employee structure
-  - Economic assertions:
-    - `assert_unique` - ID uniqueness (uses gisid for performance)
-    - `assert_no_missing` - No missing values
-    - `assert_positive` - All values positive
-    - `assert_sorted` - Sort order preserved (uses hashsort)
-    - `assert_panel_structure` - Valid xtset with balanced option
-    - `assert_sum_equals` - Sum equals expected with by-group support
-    - `assert_identity` - Accounting identities (A + B == C)
+- Panel data fixtures (merged from econ extension):
+  - `fixture_balanced_panel` - Balanced panel data
+  - `fixture_unbalanced_panel` - Panel with attrition, entry, gaps
+  - `fixture_multilevel_panel` - Hierarchical panel (group × unit × year)
+- Network fixtures:
+  - `fixture_production_network` - Sparse directed weighted network
+  - `fixture_bipartite_network` - Two-mode network structure
+- Data validation assertions:
+  - `assert_unique` - ID uniqueness (uses gisid for performance)
+  - `assert_no_missing` - No missing values
+  - `assert_positive` - All values positive
+  - `assert_sorted` - Sort order preserved (uses hashsort)
+  - `assert_panel_structure` - Valid xtset with balanced option
+  - `assert_sum_equals` - Sum equals expected with by-group support
+  - `assert_identity` - Accounting identities (A + B == C)
 - Fixture system with pytest-like `conftest.do` pattern
 - Built-in fixtures:
   - `use_fixture` - Request a fixture by name
@@ -33,21 +32,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `fixture_seed` - Reproducible random seed
 - Fixture scoping: function, module, session
 - Automatic `conftest.do` discovery in directory hierarchy
-- Fixture example in `examples/fixtures/`
 - Coverage instrumentation module (`instrument.py`)
   - SMCL comment markers for invisible coverage tracking
   - Automatic instrumentation to `.statatest/instrumented/` directory
   - Line number mapping for accurate reporting
 - Enhanced coverage module with `FileCoverage` and `CoverageReport` classes
 - HTML coverage report generation
-- Pre-commit hooks for Python, Markdown, and Stata
-- Release-please for automatic changelog generation
-- Python tests for fixture and coverage modules (48 total tests)
+- Logging module (`core/logging.py`) with ANSI color support
+- 90 Python tests passing
 
 ### Changed
 
 - Reorganized package structure: moved ado files to `statatest/ado/`
+- Centralized all constants in `core/constants.py`
+- Replaced `rich` library with Python standard logging + ANSI colors
+- Merged [econ] extension into main package (no separate install needed)
 - Improved path handling with `importlib.resources`
+
+### Removed
+
+- `rich` dependency (replaced with standard library)
+- `[econ]` optional extra (all features now included by default)
 
 ## [0.1.0] - 2025-12-26
 
