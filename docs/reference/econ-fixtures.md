@@ -102,12 +102,12 @@ fixture_multilevel_panel [, n_groups(#) n_units(#) n_periods(#) ///
 
 ## Network Fixtures
 
-### fixture_production_network
+### fixture_directed_network
 
-Creates a sparse directed weighted production network.
+Creates a sparse directed weighted network.
 
 ```stata
-fixture_production_network [, n_firms(#) n_edges(#) temporal seed(#)]
+fixture_directed_network [, n_firms(#) n_edges(#) temporal seed(#)]
 ```
 
 **Parameters:**
