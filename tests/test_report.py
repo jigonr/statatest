@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from statatest.models import TestResult
-from statatest.report import generate_lcov, write_junit_xml
+from statatest.report import generate_html, generate_lcov, write_junit_xml
 
 
 @pytest.fixture
@@ -130,3 +130,121 @@ def test_generate_lcov_aggregates_coverage():
         # Lines 1-5 should all be covered (union of both test results)
         for line in range(1, 6):
             assert f"DA:{line},1" in content
+
+
+def test_write_junit_xml_with_stdout():
+    """Test that stdout is included in JUnit XML."""
+    results = [
+        TestResult(
+            test_file="tests/test_example.do",
+            passed=True,
+            duration=1.0,
+            stdout="This is stdout output from the test",
+        ),
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = Path(tmpdir) / "junit.xml"
+        write_junit_xml(results, output_path)
+
+        content = output_path.read_text()
+        assert "<system-out>" in content
+        assert "This is stdout output" in content
+
+
+def test_write_junit_xml_with_stderr():
+    """Test that stderr is included in JUnit XML."""
+    results = [
+        TestResult(
+            test_file="tests/test_example.do",
+            passed=False,
+            duration=1.0,
+            error_message="Test failed",
+            stderr="This is stderr output from the test",
+        ),
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = Path(tmpdir) / "junit.xml"
+        write_junit_xml(results, output_path)
+
+        content = output_path.read_text()
+        assert "<system-err>" in content
+        assert "This is stderr output" in content
+
+
+def test_generate_html_creates_index():
+    """Test that generate_html creates index.html."""
+    results = [
+        TestResult(
+            test_file="test.do",
+            passed=True,
+            duration=1.0,
+            coverage_hits={"myfunction.ado": {1, 2, 3}},
+        ),
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir) / "htmlcov"
+        generate_html(results, output_dir)
+
+        index_path = output_dir / "index.html"
+        assert index_path.exists()
+
+        content = index_path.read_text()
+        assert "Coverage Report" in content
+        assert "myfunction.ado" in content
+
+
+def test_generate_html_creates_file_reports():
+    """Test that generate_html creates per-file HTML reports."""
+    results = [
+        TestResult(
+            test_file="test.do",
+            passed=True,
+            duration=1.0,
+            coverage_hits={
+                "myfunction.ado": {1, 2, 3},
+                "helper/utils.ado": {10, 20},
+            },
+        ),
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir) / "htmlcov"
+        generate_html(results, output_dir)
+
+        # Check per-file reports exist (slashes replaced with underscores)
+        assert (output_dir / "myfunction.ado.html").exists()
+        assert (output_dir / "helper_utils.ado.html").exists()
+
+        # Check content
+        file_content = (output_dir / "myfunction.ado.html").read_text()
+        assert "myfunction.ado" in file_content
+        assert "Lines hit: 3" in file_content
+
+
+def test_generate_html_multiple_results():
+    """Test that coverage is aggregated across results in HTML report."""
+    results = [
+        TestResult(
+            test_file="test1.do",
+            passed=True,
+            duration=1.0,
+            coverage_hits={"file.ado": {1, 2}},
+        ),
+        TestResult(
+            test_file="test2.do",
+            passed=True,
+            duration=1.0,
+            coverage_hits={"file.ado": {2, 3}},
+        ),
+    ]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_dir = Path(tmpdir) / "htmlcov"
+        generate_html(results, output_dir)
+
+        file_content = (output_dir / "file.ado.html").read_text()
+        # Should have lines 1, 2, 3 (union)
+        assert "Lines hit: 3" in file_content
