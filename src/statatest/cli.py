@@ -124,14 +124,19 @@ def _run_test_session(
 
 @click.group(invoke_without_command=True)
 @click.argument("path", type=click.Path(exists=True), required=False)
-@click.option("--coverage", is_flag=True, help="Enable coverage collection")
-@click.option("--cov-report", type=str, help="Coverage report format (lcov, html)")
-@click.option("--junit-xml", type=click.Path(), help="Output JUnit XML to this path")
-@click.option("-m", "--marker", type=str, help="Only run tests with this marker")
-@click.option("-k", "--keyword", type=str, help="Only run tests matching keyword")
-@click.option("-v", "--verbose", is_flag=True, help="Verbose output")
-@click.option("--version", is_flag=True, help="Show version and exit")
-@click.option("--init", is_flag=True, help="Create statatest.toml template")
+@click.option("-c", "--coverage", is_flag=True, help="Enable coverage collection.")
+@click.option(
+    "-r",
+    "--cov-report",
+    type=click.Choice(["lcov", "html"]),
+    help="Coverage report format.",
+)
+@click.option("-j", "--junit-xml", type=click.Path(), help="Output JUnit XML to path.")
+@click.option("-m", "--marker", type=str, help="Only run tests with this marker.")
+@click.option("-k", "--keyword", type=str, help="Only run tests matching keyword.")
+@click.option("-v", "--verbose", is_flag=True, help="Verbose output.")
+@click.option("-V", "--version", "show_version", is_flag=True, help="Show version.")
+@click.option("-i", "--init", is_flag=True, help="Create statatest.toml template.")
 @click.pass_context
 def main(
     ctx: click.Context,
@@ -142,18 +147,28 @@ def main(
     marker: str | None,
     keyword: str | None,
     verbose: bool,
-    version: bool,
+    show_version: bool,
     init: bool,
 ) -> None:
     """statatest - Pytest-inspired testing framework for Stata.
 
-    Run tests:
-        statatest tests/
+    \b
+    Examples:
+        statatest tests/                Run all tests
+        statatest tests/ -v             Verbose output
+        statatest tests/ -c             Enable coverage
+        statatest tests/ -c -r lcov     Coverage with LCOV report
+        statatest tests/ -j junit.xml   Generate JUnit XML
+        statatest tests/ -m unit        Run @marker: unit tests
+        statatest tests/ -k panel       Run tests matching 'panel'
+        statatest -i                    Create config template
 
-    Run with coverage:
-        statatest tests/ --coverage --cov-report=lcov
+    \b
+    Configuration:
+        Create statatest.toml in project root, or use [tool.statatest]
+        in pyproject.toml. Run `statatest --init` to generate a template.
     """
-    if version:
+    if show_version:
         click.echo(f"statatest version {__version__}")
         sys.exit(0)
 

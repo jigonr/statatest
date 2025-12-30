@@ -49,7 +49,7 @@ statatest = "statatest.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/jigonr/statatest"
-Documentation = "https://jigonr.github.io/statatest/"
+Documentation = "https://jigonzalez.com/statatest/"
 Repository = "https://github.com/jigonr/statatest"
 Issues = "https://github.com/jigonr/statatest/issues"
 Changelog = "https://github.com/jigonr/statatest/blob/main/CHANGELOG.md"
@@ -122,7 +122,6 @@ ignore = [
     "ISC001",   # Implicit string concatenation (conflicts with formatter)
     "TC001",    # Move application imports to type-checking block (too invasive)
     "TC003",    # Move stdlib imports to type-checking block (too invasive)
-    "PLC0415",  # Allow imports inside functions (lazy loading)
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -132,7 +131,6 @@ ignore = [
     "PLR2004",  # Allow magic values in tests
     "ANN",      # Skip type annotations in tests
     "S314",     # Allow XML parsing in tests
-    "RUF059",   # Allow unpacked unused variables in tests
     "E501",     # Allow long lines in tests
 ]
 "src/statatest/cli.py" = ["PLR0913"]    # CLI has many options
