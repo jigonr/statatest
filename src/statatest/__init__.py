@@ -1,6 +1,6 @@
 """statatest - Pytest-inspired testing and code coverage framework for Stata."""
 
-__version__ = "0.1.1"
+__version__ = "0.1.0"
 __author__ = "Jose Ignacio Gonzalez Rojas"
 __email__ = "j.i.gonzalez-rojas@lse.ac.uk"
 
