@@ -43,7 +43,7 @@ repos:
       - id: mypy
         name: 🐍 Check Python types with mypy
         args: ['--strict']
-        additional_dependencies: ['click', 'rich']
+        additional_dependencies: ['click']
         files: '^src/statatest/'
         stages: [pre-push, manual]
 
@@ -82,7 +82,7 @@ repos:
     hooks:
       - id: markdownlint
         name: 📝 Lint Markdown formatting
-        args: ['--config', '.markdownlintrc']
+        args: ['--config', '.markdownlint.json']
         stages: [pre-push, manual]
 
   # Stata .ado file checks (custom)

@@ -1,36 +1,43 @@
+---
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
   schedule:
     # Run Stata integration tests weekly on Sundays at 00:00 UTC
     - cron: "0 0 * * 0"
   workflow_dispatch:
     inputs:
       run_stata_tests:
-        description: "Run Stata integration tests"
+        description: Run Stata integration tests
         required: false
-        default: "false"
+        default: false
         type: boolean
 
 jobs:
   test:
+    name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
         with:
-          version: "latest"
+          version: latest
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
@@ -39,7 +46,12 @@ jobs:
         run: uv sync --extra dev
 
       - name: Run tests with coverage
-        run: uv run pytest --cov=src/statatest --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
+        run: |
+          uv run pytest \
+            --cov=src/statatest \
+            --cov-report=xml \
+            --junitxml=junit.xml \
+            -o junit_family=legacy
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
@@ -54,59 +66,30 @@ jobs:
           flags: python-${{ matrix.python-version }}
           fail_ci_if_error: false
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: "latest"
-
-      - name: Set up Python
-        run: uv python install 3.12
-
-      - name: Install dependencies
-        run: uv sync --extra dev
-
-      - name: Run ruff check
-        run: uv run ruff check .
-
-      - name: Run ruff format check
-        run: uv run ruff format --check .
-
-      - name: Run mypy
-        run: uv run mypy src/statatest
-
-  # Integration tests with Stata (scheduled weekly or manual trigger)
   integration:
+    name: Integration (Stata)
     runs-on: ubuntu-latest
     if: >
       github.event_name == 'schedule' ||
-      (github.event_name == 'workflow_dispatch' && inputs.run_stata_tests == 'true')
+      (github.event_name == 'workflow_dispatch' && inputs.run_stata_tests)
     container:
-      # Use pinned version from AEA Data Editor's Docker images
-      # See: https://hub.docker.com/r/dataeditors/stata18_5-mp/tags
       image: dataeditors/stata18_5-mp:2025-02-26
       options: --user root
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up license
+      - name: Set up Stata license
         run: |
           echo "${{ secrets.STATA_LIC_B64 }}" | base64 -d > /usr/local/stata/stata.lic
 
       - name: Verify Stata installation
-        run: |
-          stata-mp -v
-          echo "Stata installation verified"
+        run: stata-mp -v
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
         with:
-          version: "latest"
+          version: latest
 
       - name: Set up Python
         run: uv python install 3.12
@@ -114,13 +97,13 @@ jobs:
       - name: Install statatest
         run: uv pip install -e .
 
-      - name: Run Stata assertion tests
+      - name: Run Stata tests
         run: |
           statatest tests/stata/ \
-            --verbose \
-            --junit-xml=junit-stata.xml \
-            --coverage \
-            --cov-report=lcov
+            -v \
+            -j junit-stata.xml \
+            -c \
+            -r lcov
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
