@@ -88,13 +88,60 @@ class TestCreateWrapperDo:
         )
 
         # Instrumented dir should be added first with coverage comment
+        # Uses adopath ++ (double plus) to prepend with highest priority
         assert "// Instrumented source files for coverage" in wrapper
-        assert 'adopath + "/project/.statatest/instrumented"' in wrapper
+        assert 'adopath ++ "/project/.statatest/instrumented"' in wrapper
+        # discard clears cached programs to force reload from instrumented path
+        assert "discard" in wrapper
 
         # And should appear before other ado paths
         instr_pos = wrapper.find("instrumented")
         assertions_pos = wrapper.find("assertions")
         assert instr_pos < assertions_pos
+
+    def test_includes_log_path_for_coverage(self):
+        """Test that log_path adds SMCL logging commands for coverage."""
+        test_path = Path("/project/tests/test_example.do")
+        ado_paths = {}
+        conftest_files: list[Path] = []
+        log_path = Path("/project/.statatest/coverage.smcl")
+
+        wrapper = _create_wrapper_do(
+            test_path, ado_paths, conftest_files, log_path=log_path
+        )
+
+        # Should include log using command at the start
+        assert "// Start SMCL log for coverage marker capture" in wrapper
+        assert 'log using "/project/.statatest/coverage.smcl", smcl replace' in wrapper
+
+        # Should include log close at the end
+        assert "// Close log" in wrapper
+        assert "log close" in wrapper
+
+        # Log should be opened before test execution
+        log_pos = wrapper.find("log using")
+        test_pos = wrapper.find("test_example.do")
+        assert log_pos < test_pos
+
+    def test_includes_setup_do(self):
+        """Test that setup_do script is included in wrapper."""
+        test_path = Path("/project/tests/test_example.do")
+        ado_paths = {}
+        conftest_files: list[Path] = []
+        setup_do = "/project/tests/setup.do"
+
+        wrapper = _create_wrapper_do(
+            test_path, ado_paths, conftest_files, setup_do=setup_do
+        )
+
+        # Should include setup script section
+        assert "// User-defined setup script" in wrapper
+        assert 'do "/project/tests/setup.do"' in wrapper
+
+        # Setup should run before the test
+        setup_pos = wrapper.find("setup.do")
+        test_pos = wrapper.find("test_example.do")
+        assert setup_pos < test_pos
 
 
 class TestParseCoverageMarkers:

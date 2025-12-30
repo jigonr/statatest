@@ -63,7 +63,10 @@ def instrument_file(source_path: Path, dest_path: Path) -> dict[int, int]:
     # Track line number mapping (instrumented -> original)
     line_map: dict[int, int] = {}
 
-    instrumented_lines: list[str] = []
+    # Add marker header so `which` command shows this is instrumented
+    instrumented_lines: list[str] = [
+        f"*! INSTRUMENTED BY STATATEST - {source_path.name}",
+    ]
     filename = source_path.name
 
     for orig_lineno, line in enumerate(lines, start=1):

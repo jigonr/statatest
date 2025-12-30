@@ -15,16 +15,19 @@ def create_wrapper_do(
     conftest_files: list[Path],
     instrumented_dir: Path | None = None,
     setup_do: str | None = None,
+    log_path: Path | None = None,
 ) -> str:
     """Create a wrapper .do file for test execution.
 
     The wrapper executes in this order:
     1. Clear and set Stata options
-    2. Add instrumented directory (for coverage) - highest priority
-    3. Add statatest ado paths (assertions, fixtures)
-    4. Run setup_do (if configured)
-    5. Load conftest.do files (fixtures and shared setup)
-    6. Run the actual test
+    2. Start SMCL log (for coverage marker capture)
+    3. Add instrumented directory (for coverage) - highest priority
+    4. Add statatest ado paths (assertions, fixtures)
+    5. Run setup_do (if configured)
+    6. Load conftest.do files (fixtures and shared setup)
+    7. Run the actual test
+    8. Close log
 
     Args:
         test_path: Path to the test file.
@@ -32,6 +35,7 @@ def create_wrapper_do(
         conftest_files: List of conftest.do files to load (in order).
         instrumented_dir: Path to instrumented source files (for coverage).
         setup_do: Optional path to a setup.do file for custom initialization.
+        log_path: Path to save SMCL log (for coverage marker parsing).
 
     Returns:
         Contents of the wrapper .do file.
@@ -40,6 +44,10 @@ def create_wrapper_do(
 
     # Header
     lines.extend(_generate_header())
+
+    # Start SMCL log for coverage (must be before any instrumented code runs)
+    if log_path:
+        lines.extend(_generate_log_section(log_path))
 
     # Instrumented directory (highest priority for coverage)
     if instrumented_dir:
@@ -60,6 +68,10 @@ def create_wrapper_do(
     # Test execution
     lines.extend(_generate_test_section(test_path))
 
+    # Close log
+    if log_path:
+        lines.extend(_generate_log_close_section())
+
     return "\n".join(lines)
 
 
@@ -75,11 +87,37 @@ def _generate_header() -> list[str]:
     ]
 
 
+def _generate_log_section(log_path: Path) -> list[str]:
+    """Generate section to start SMCL log for coverage marker capture."""
+    return [
+        "// Start SMCL log for coverage marker capture",
+        f'log using "{log_path}", smcl replace',
+        "",
+    ]
+
+
+def _generate_log_close_section() -> list[str]:
+    """Generate section to close the log file."""
+    return [
+        "",
+        "// Close log",
+        "log close",
+    ]
+
+
 def _generate_instrumented_section(instrumented_dir: Path) -> list[str]:
-    """Generate section for instrumented source files (coverage)."""
+    """Generate section for instrumented source files (coverage).
+
+    Uses adopath ++ (double plus) to PREPEND with highest priority,
+    ensuring instrumented files are found before any user-added paths.
+
+    Also uses 'discard' to clear any cached .ado programs, forcing Stata
+    to reload them from the new adopath (instrumented versions).
+    """
     return [
         "// Instrumented source files for coverage (highest priority)",
-        f'adopath + "{instrumented_dir}"',
+        f'adopath ++ "{instrumented_dir}"',
+        "discard  // Clear cached programs to force reload from instrumented path",
         "",
     ]
 
