@@ -4,8 +4,8 @@ Generate test and coverage reports.
 
 ## Components
 
-| File | Purpose |
-|------|---------|
+| File       | Purpose                     |
+| ---------- | --------------------------- |
 | `junit.py` | JUnit XML report generation |
 
 ## JUnit XML

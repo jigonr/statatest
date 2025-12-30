@@ -7,6 +7,7 @@ Common issues and solutions when using statatest.
 ### statatest command not found
 
 **Symptom:**
+
 ```
 bash: statatest: command not found
 ```
@@ -14,22 +15,24 @@ bash: statatest: command not found
 **Solutions:**
 
 1. **Ensure pip/uv installed to PATH:**
+
    ```bash
    # Check if installed
    pip show statatest
-   
+
    # Reinstall with pip
    pip install --user statatest
-   
+
    # Or use uv
    uv tool install statatest
    ```
 
 2. **Add Python user bin to PATH:**
+
    ```bash
    # macOS/Linux
    export PATH="$HOME/.local/bin:$PATH"
-   
+
    # Add to ~/.bashrc or ~/.zshrc for persistence
    ```
 
@@ -45,6 +48,7 @@ bash: statatest: command not found
 ### Stata executable not found
 
 **Symptom:**
+
 ```
 Error: Stata executable not found
 ```
@@ -52,6 +56,7 @@ Error: Stata executable not found
 **Solutions:**
 
 1. **Check Stata is installed:**
+
    ```bash
    which stata-mp
    which stata-se
@@ -59,27 +64,30 @@ Error: Stata executable not found
    ```
 
 2. **Configure in statatest.toml:**
+
    ```toml
    [tool.statatest]
    stata_executable = "/usr/local/bin/stata-mp"
    ```
 
 3. **Set environment variable:**
+
    ```bash
    export STATA_PATH=/usr/local/bin/stata-mp
    ```
 
 4. **Common Stata paths:**
 
-   | OS | Path |
-   |----|------|
-   | macOS | `/usr/local/bin/stata-mp` |
-   | Linux | `/usr/local/stata18/stata-mp` |
+   | OS      | Path                                      |
+   | ------- | ----------------------------------------- |
+   | macOS   | `/usr/local/bin/stata-mp`                 |
+   | Linux   | `/usr/local/stata18/stata-mp`             |
    | Windows | `C:\Program Files\Stata18\StataMP-64.exe` |
 
 ### Permission denied when running Stata
 
 **Symptom:**
+
 ```
 stata-mp: Permission denied
 ```
@@ -87,11 +95,13 @@ stata-mp: Permission denied
 **Solutions:**
 
 1. **Make Stata executable:**
+
    ```bash
    chmod +x /usr/local/bin/stata-mp
    ```
 
 2. **Check file permissions:**
+
    ```bash
    ls -la /usr/local/bin/stata*
    ```
@@ -106,6 +116,7 @@ stata-mp: Permission denied
 ### License issues in CI
 
 **Symptom:**
+
 ```
 r(601): license not found
 ```
@@ -113,15 +124,17 @@ r(601): license not found
 **Solutions:**
 
 1. **Encode license for secrets:**
+
    ```bash
    # macOS
    base64 -i stata.lic | pbcopy
-   
+
    # Linux
    base64 stata.lic | xclip -selection clipboard
    ```
 
 2. **Decode in workflow:**
+
    ```yaml
    - name: Set up Stata license
      run: |
@@ -138,6 +151,7 @@ r(601): license not found
 ### No tests found
 
 **Symptom:**
+
 ```
 Found 0 test file(s)
 ```
@@ -149,12 +163,14 @@ Found 0 test file(s)
    - Example: `test_myfunction.do`, `test_analysis.do`
 
 2. **Verify testpaths configuration:**
+
    ```toml
    [tool.statatest]
    testpaths = ["tests"]  # Must point to existing directory
    ```
 
 3. **Check directory structure:**
+
    ```bash
    ls -la tests/
    find . -name "test_*.do"
@@ -173,18 +189,20 @@ Found 0 test file(s)
 **Solutions:**
 
 1. **Check for syntax errors in test files:**
+
    ```bash
    stata-mp -b do tests/test_example.do
    cat tests/test_example.log
    ```
 
 2. **Ensure test programs are called:**
+
    ```stata
    // Define test
    program define test_something
        // ...
    end
-   
+
    // Must call the test!
    test_something
    ```
@@ -200,12 +218,14 @@ Found 0 test file(s)
 **Solutions:**
 
 1. **Configure source paths:**
+
    ```toml
    [tool.statatest.coverage]
    source = ["code/functions"]  # Point to your .ado files
    ```
 
 2. **Verify .ado files exist:**
+
    ```bash
    ls -la code/functions/*.ado
    ```
@@ -222,6 +242,7 @@ Found 0 test file(s)
 **Solutions:**
 
 1. **Enable coverage explicitly:**
+
    ```bash
    statatest tests/ --coverage --cov-report=lcov
    ```
@@ -241,6 +262,7 @@ Found 0 test file(s)
 **Solutions:**
 
 1. **Use deterministic random seed:**
+
    ```stata
    fixture_seed, seed(12345)
    ```
@@ -267,15 +289,17 @@ Found 0 test file(s)
 **Solutions:**
 
 1. **Check for trailing spaces:**
+
    ```stata
    // Bad
    assert_equal "`r(result)' ", expected("value")
-   
+
    // Good
    assert_equal "`r(result)'", expected("value")
    ```
 
 2. **Use strtrim() for string comparison:**
+
    ```stata
    assert_equal strtrim("`r(result)'"), expected("value")
    ```
@@ -293,6 +317,7 @@ Found 0 test file(s)
 **Solutions:**
 
 1. **Increase tolerance:**
+
    ```stata
    // Default tolerance may be too strict
    assert_approx_equal `r(mean)', expected(0.5) tol(0.01)
@@ -312,6 +337,7 @@ Found 0 test file(s)
 ### Fixture not found
 
 **Symptom:**
+
 ```
 Error: Fixture 'sample_data' not found
 ```
@@ -319,11 +345,13 @@ Error: Fixture 'sample_data' not found
 **Solutions:**
 
 1. **Check conftest.do exists:**
+
    ```bash
    ls -la tests/conftest.do
    ```
 
 2. **Verify fixture program name:**
+
    ```stata
    // In conftest.do
    program define fixture_sample_data  // Must start with fixture_
@@ -342,17 +370,18 @@ Error: Fixture 'sample_data' not found
 **Solutions:**
 
 1. **Specify scope explicitly:**
+
    ```stata
    use_fixture sample_data, scope(module)
    ```
 
 2. **Understand scope behavior:**
 
-   | Scope | Behavior |
-   |-------|----------|
+   | Scope      | Behavior                     |
+   | ---------- | ---------------------------- |
    | `function` | Runs for each test (default) |
-   | `module` | Runs once per test file |
-   | `session` | Runs once per test run |
+   | `module`   | Runs once per test file      |
+   | `session`  | Runs once per test run       |
 
 ---
 
@@ -363,13 +392,15 @@ Error: Fixture 'sample_data' not found
 **Common causes and solutions:**
 
 1. **Python version mismatch:**
+
    ```yaml
    - uses: actions/setup-python@v5
      with:
-       python-version: "3.12"  # Ensure 3.11+
+       python-version: "3.12" # Ensure 3.11+
    ```
 
 2. **Missing dependencies:**
+
    ```yaml
    - run: pip install statatest
    ```
@@ -385,11 +416,13 @@ Error: Fixture 'sample_data' not found
 **Solutions:**
 
 1. **Specify output path:**
+
    ```bash
    statatest tests/ --junit-xml=junit.xml
    ```
 
 2. **Check file is created:**
+
    ```yaml
    - run: |
        statatest tests/ --junit-xml=junit.xml
@@ -414,6 +447,7 @@ Error: Fixture 'sample_data' not found
 **Solutions:**
 
 1. **Use module/session scope for expensive fixtures:**
+
    ```stata
    use_fixture large_dataset, scope(session)
    ```
@@ -432,6 +466,7 @@ Error: Fixture 'sample_data' not found
 **Solutions:**
 
 1. **Clear data between tests:**
+
    ```stata
    program define fixture_cleanup_teardown
        clear all
@@ -440,6 +475,7 @@ Error: Fixture 'sample_data' not found
    ```
 
 2. **Use smaller test datasets:**
+
    ```stata
    // Instead of 1M observations
    set obs 1000
@@ -457,8 +493,10 @@ Error: Fixture 'sample_data' not found
 
 If you can't resolve your issue:
 
-1. **Check existing issues:** [GitHub Issues](https://github.com/jigonr/statatest/issues)
-2. **Search discussions:** [GitHub Discussions](https://github.com/jigonr/statatest/discussions)
+1. **Check existing issues:**
+   [GitHub Issues](https://github.com/jigonr/statatest/issues)
+2. **Search discussions:**
+   [GitHub Discussions](https://github.com/jigonr/statatest/discussions)
 3. **Open a new issue** with:
    - statatest version (`statatest --version`)
    - Stata version

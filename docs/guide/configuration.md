@@ -42,25 +42,25 @@ statatest --init
 
 ### Test Discovery
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `testpaths` | list | `["tests"]` | Directories to search for tests |
-| `test_files` | list | `["test_*.do"]` | Glob patterns for test files |
-| `stata_executable` | string | auto | Path to Stata executable |
+| Option             | Type   | Default         | Description                     |
+| ------------------ | ------ | --------------- | ------------------------------- |
+| `testpaths`        | list   | `["tests"]`     | Directories to search for tests |
+| `test_files`       | list   | `["test_*.do"]` | Glob patterns for test files    |
+| `stata_executable` | string | auto            | Path to Stata executable        |
 
 ### Coverage Settings
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `source` | list | `[]` | Directories containing `.ado` files to instrument |
-| `omit` | list | `[]` | Patterns to exclude from coverage |
+| Option   | Type | Default | Description                                       |
+| -------- | ---- | ------- | ------------------------------------------------- |
+| `source` | list | `[]`    | Directories containing `.ado` files to instrument |
+| `omit`   | list | `[]`    | Patterns to exclude from coverage                 |
 
 ### Reporting
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `junit_xml` | string | `null` | Path for JUnit XML output |
-| `lcov` | string | `null` | Path for LCOV coverage output |
+| Option      | Type   | Default | Description                   |
+| ----------- | ------ | ------- | ----------------------------- |
+| `junit_xml` | string | `null`  | Path for JUnit XML output     |
+| `lcov`      | string | `null`  | Path for LCOV coverage output |
 
 ## Auto-Detection
 
@@ -72,9 +72,9 @@ statatest automatically detects the Stata executable:
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `STATA_PATH` | Override Stata executable path |
+| Variable           | Description                                     |
+| ------------------ | ----------------------------------------------- |
+| `STATA_PATH`       | Override Stata executable path                  |
 | `STATATEST_CONFIG` | Path to config file (default: `statatest.toml`) |
 
 ## Example Configurations

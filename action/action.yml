@@ -86,7 +86,7 @@ runs:
       shell: bash
       run: |
         CMD="statatest"
-        
+
         # Add options before path
         if [ "${{ inputs.coverage }}" = "true" ]; then
           CMD="$CMD --coverage"
@@ -94,26 +94,26 @@ runs:
             CMD="$CMD --cov-report=${{ inputs.cov-report }}"
           fi
         fi
-        
+
         if [ -n "${{ inputs.junit-xml }}" ]; then
           CMD="$CMD --junit-xml=${{ inputs.junit-xml }}"
         fi
-        
+
         if [ -n "${{ inputs.marker }}" ]; then
           CMD="$CMD -m ${{ inputs.marker }}"
         fi
-        
+
         if [ -n "${{ inputs.keyword }}" ]; then
           CMD="$CMD -k ${{ inputs.keyword }}"
         fi
-        
+
         if [ "${{ inputs.verbose }}" = "true" ]; then
           CMD="$CMD -v"
         fi
-        
+
         # Add path last
         CMD="$CMD ${{ inputs.tests }}"
-        
+
         echo "command=$CMD" >> $GITHUB_OUTPUT
         echo "Running: $CMD"
 
@@ -125,10 +125,10 @@ runs:
         ${{ steps.build-command.outputs.command }}
         EXIT_CODE=$?
         set -e
-        
+
         # Parse results from output (placeholder - actual parsing would need log analysis)
         echo "passed=0" >> $GITHUB_OUTPUT
         echo "failed=0" >> $GITHUB_OUTPUT
         echo "total=0" >> $GITHUB_OUTPUT
-        
+
         exit $EXIT_CODE

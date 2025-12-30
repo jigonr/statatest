@@ -1,6 +1,7 @@
 # Assertions Reference
 
-All assertions available in statatest. All assertions support `verbose` option for detailed output.
+All assertions available in statatest. All assertions support `verbose` option
+for detailed output.
 
 ## assert_equal
 
@@ -12,11 +13,11 @@ assert_equal value, expected(expected_value) [message(string)]
 
 **Parameters:**
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `value` | Yes | Actual value to test |
-| `expected()` | Yes | Expected value |
-| `message()` | No | Custom error message |
+| Parameter    | Required | Description          |
+| ------------ | -------- | -------------------- |
+| `value`      | Yes      | Actual value to test |
+| `expected()` | Yes      | Expected value       |
+| `message()`  | No       | Custom error message |
 
 **Example:**
 
@@ -136,9 +137,9 @@ assert_approx_equal value, expected(#) [tol(#) message(string)]
 
 **Parameters:**
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `tol()` | 1e-6 | Tolerance for comparison |
+| Parameter | Default | Description              |
+| --------- | ------- | ------------------------ |
+| `tol()`   | 1e-6    | Tolerance for comparison |
 
 **Example:**
 
@@ -206,7 +207,8 @@ Check that variable has expected type.
 assert_var_type varname, type(string) [message(string) verbose]
 ```
 
-**Type options:** `numeric`, `string`, `byte`, `int`, `long`, `float`, `double`, `str#`
+**Type options:** `numeric`, `string`, `byte`, `int`, `long`, `float`, `double`,
+`str#`
 
 **Example:**
 
@@ -277,9 +279,9 @@ assert_positive varname [if] [, strict message(string) verbose]
 
 **Parameters:**
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `strict` | off | If specified, requires `> 0`; otherwise `>= 0` |
+| Parameter | Default | Description                                    |
+| --------- | ------- | ---------------------------------------------- |
+| `strict`  | off     | If specified, requires `> 0`; otherwise `>= 0` |
 
 **Example:**
 
@@ -316,10 +318,10 @@ assert_panel_structure [panelvar timevar] [, balanced message(string) verbose]
 
 **Parameters:**
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `panelvar timevar` | No | If omitted, checks current xtset |
-| `balanced` | No | Require all units have all periods |
+| Parameter          | Required | Description                        |
+| ------------------ | -------- | ---------------------------------- |
+| `panelvar timevar` | No       | If omitted, checks current xtset   |
+| `balanced`         | No       | Require all units have all periods |
 
 **Example:**
 

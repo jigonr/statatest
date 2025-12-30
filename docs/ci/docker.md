@@ -1,6 +1,8 @@
 # Docker Integration
 
-This guide covers using statatest with the [AEA Data Editor's Docker images](https://hub.docker.com/u/dataeditors), which provide Stata in containers for CI/CD.
+This guide covers using statatest with the
+[AEA Data Editor's Docker images](https://hub.docker.com/u/dataeditors), which
+provide Stata in containers for CI/CD.
 
 ## Available Images
 
@@ -8,26 +10,26 @@ The AEA Data Editor maintains Docker images for various Stata versions:
 
 ### Stata 18.5 (Recommended)
 
-| Image | Description | Size |
-|-------|-------------|------|
-| `dataeditors/stata18_5-mp` | MP (multiprocessor) | ~537MB |
-| `dataeditors/stata18_5-mp-i` | MP + help files | ~3.2GB |
+| Image                        | Description           | Size   |
+| ---------------------------- | --------------------- | ------ |
+| `dataeditors/stata18_5-mp`   | MP (multiprocessor)   | ~537MB |
+| `dataeditors/stata18_5-mp-i` | MP + help files       | ~3.2GB |
 | `dataeditors/stata18_5-mp-x` | MP + GUI (incomplete) | ~4.4GB |
-| `dataeditors/stata18_5-se` | SE (standard) | ~2.6GB |
-| `dataeditors/stata18_5-be` | BE (basic) | ~2.6GB |
+| `dataeditors/stata18_5-se`   | SE (standard)         | ~2.6GB |
+| `dataeditors/stata18_5-be`   | BE (basic)            | ~2.6GB |
 
 ### Stata 19.5 (Newest)
 
-| Image | Description |
-|-------|-------------|
+| Image                      | Description         |
+| -------------------------- | ------------------- |
 | `dataeditors/stata19_5-mp` | MP (multiprocessor) |
-| `dataeditors/stata19_5-se` | SE (standard) |
-| `dataeditors/stata19_5-be` | BE (basic) |
+| `dataeditors/stata19_5-se` | SE (standard)       |
+| `dataeditors/stata19_5-be` | BE (basic)          |
 
 ### Version Tags
 
-!!! warning "Always use pinned version tags"
-    Never use `latest` tag. Use specific date tags for reproducibility.
+!!! warning "Always use pinned version tags" Never use `latest` tag. Use
+specific date tags for reproducibility.
 
 **Available tags for `stata18_5-mp`:**
 
@@ -118,6 +120,7 @@ docker run --rm \
 Store the license as a base64-encoded secret:
 
 1. **Encode your license:**
+
    ```bash
    base64 -i stata.lic -o stata_lic_b64.txt
    ```
@@ -152,7 +155,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Decode Stata license
-        run: echo "${{ secrets.STATA_LIC_B64 }}" | base64 -d > /usr/local/stata/stata.lic
+        run:
+          echo "${{ secrets.STATA_LIC_B64 }}" | base64 -d >
+          /usr/local/stata/stata.lic
 
       - name: Install uv
         run: |
@@ -176,19 +181,20 @@ jobs:
 ### With Coverage
 
 ```yaml
-      - name: Run tests with coverage
-        run: statatest tests/ --coverage --cov-report=lcov --junit-xml junit.xml
+- name: Run tests with coverage
+  run: statatest tests/ --coverage --cov-report=lcov --junit-xml junit.xml
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: coverage.lcov
-          token: ${{ secrets.CODECOV_TOKEN }}
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v4
+  with:
+    files: coverage.lcov
+    token: ${{ secrets.CODECOV_TOKEN }}
 ```
 
 ## Installing Stata Packages
 
-If your tests require additional Stata packages (gtools, estout, etc.), install them in the Dockerfile:
+If your tests require additional Stata packages (gtools, estout, etc.), install
+them in the Dockerfile:
 
 ```dockerfile
 # Install Stata packages (no internet in CI)
@@ -204,9 +210,10 @@ net install gtools, from("/stata-packages/gtools")
 net install estout, from("/stata-packages/estout")
 ```
 
-!!! tip "Local Package Files"
-    Download packages locally before CI runs to avoid network dependencies.
-    The AEA Data Editor has [detailed instructions](https://github.com/AEADataEditor/replication-template/blob/master/template-README.md) on reproducible package installation.
+!!! tip "Local Package Files" Download packages locally before CI runs to avoid
+network dependencies. The AEA Data Editor has
+[detailed instructions](https://github.com/AEADataEditor/replication-template/blob/master/template-README.md)
+on reproducible package installation.
 
 ## Troubleshooting
 

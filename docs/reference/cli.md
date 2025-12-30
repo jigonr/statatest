@@ -10,48 +10,48 @@ statatest [OPTIONS] [PATH]
 
 ## Arguments
 
-| Argument | Description |
-|----------|-------------|
-| `PATH` | Test directory or file (default: `tests/`) |
+| Argument | Description                                |
+| -------- | ------------------------------------------ |
+| `PATH`   | Test directory or file (default: `tests/`) |
 
 ## Options
 
 ### General
 
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--help` | `-h` | Show help message |
-| `--version` | `-V` | Show version |
-| `--verbose` | `-v` | Verbose output |
-| `--quiet` | `-q` | Minimal output |
+| Option      | Short | Description       |
+| ----------- | ----- | ----------------- |
+| `--help`    | `-h`  | Show help message |
+| `--version` | `-V`  | Show version      |
+| `--verbose` | `-v`  | Verbose output    |
+| `--quiet`   | `-q`  | Minimal output    |
 
 ### Test Selection
 
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--keyword` | `-k` | Filter tests by keyword |
-| `--marker` | `-m` | Filter tests by marker |
+| Option      | Short | Description             |
+| ----------- | ----- | ----------------------- |
+| `--keyword` | `-k`  | Filter tests by keyword |
+| `--marker`  | `-m`  | Filter tests by marker  |
 
 ### Coverage
 
-| Option | Description |
-|--------|-------------|
-| `--coverage` | Enable coverage collection |
-| `--cov-report=TYPE` | Coverage report type: `lcov`, `html`, `term` |
-| `--cov-fail-under=N` | Fail if coverage below N% |
+| Option               | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `--coverage`         | Enable coverage collection                   |
+| `--cov-report=TYPE`  | Coverage report type: `lcov`, `html`, `term` |
+| `--cov-fail-under=N` | Fail if coverage below N%                    |
 
 ### Reporting
 
-| Option | Description |
-|--------|-------------|
+| Option             | Description               |
+| ------------------ | ------------------------- |
 | `--junit-xml=PATH` | Generate JUnit XML report |
 
 ### Configuration
 
-| Option | Description |
-|--------|-------------|
-| `--init` | Create default configuration file |
-| `--config=PATH` | Specify config file path |
+| Option          | Description                       |
+| --------------- | --------------------------------- |
+| `--init`        | Create default configuration file |
+| `--config=PATH` | Specify config file path          |
 
 ## Examples
 
@@ -123,13 +123,13 @@ statatest tests/ --config=myconfig.toml
 
 ## Exit Codes
 
-| Code | Description |
-|------|-------------|
-| 0 | All tests passed |
-| 1 | Some tests failed |
-| 2 | Configuration error |
-| 3 | No tests found |
-| 4 | Coverage below threshold |
+| Code | Description              |
+| ---- | ------------------------ |
+| 0    | All tests passed         |
+| 1    | Some tests failed        |
+| 2    | Configuration error      |
+| 3    | No tests found           |
+| 4    | Coverage below threshold |
 
 ## Output Formats
 
@@ -183,8 +183,8 @@ Coverage: 85.3%
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `STATA_PATH` | Override Stata executable |
-| `STATATEST_CONFIG` | Config file path |
-| `NO_COLOR` | Disable colored output |
+| Variable           | Description               |
+| ------------------ | ------------------------- |
+| `STATA_PATH`       | Override Stata executable |
+| `STATATEST_CONFIG` | Config file path          |
+| `NO_COLOR`         | Disable colored output    |

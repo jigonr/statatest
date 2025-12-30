@@ -6,27 +6,27 @@ Test data fixtures for Stata.
 
 ### Panel Data
 
-| Fixture | Description |
-|---------|-------------|
-| `fixture_balanced_panel` | Balanced panel (all units, all periods) |
-| `fixture_unbalanced_panel` | Unbalanced panel (varying periods) |
-| `fixture_multilevel_panel` | Nested panel structure |
+| Fixture                    | Description                             |
+| -------------------------- | --------------------------------------- |
+| `fixture_balanced_panel`   | Balanced panel (all units, all periods) |
+| `fixture_unbalanced_panel` | Unbalanced panel (varying periods)      |
+| `fixture_multilevel_panel` | Nested panel structure                  |
 
 ### Network Data
 
-| Fixture | Description |
-|---------|-------------|
-| `fixture_directed_network` | Directed graph (edges have direction) |
+| Fixture                     | Description                                |
+| --------------------------- | ------------------------------------------ |
+| `fixture_directed_network`  | Directed graph (edges have direction)      |
 | `fixture_bipartite_network` | Two-mode network (e.g., employer-employee) |
 
 ### Utilities
 
-| Fixture | Description |
-|---------|-------------|
+| Fixture                 | Description                            |
+| ----------------------- | -------------------------------------- |
 | `fixture_empty_dataset` | Empty dataset with specified variables |
-| `fixture_seed` | Set reproducible random seed |
-| `fixture_tempfile` | Create temporary file path |
-| `use_fixture` | Load a fixture by name |
+| `fixture_seed`          | Set reproducible random seed           |
+| `fixture_tempfile`      | Create temporary file path             |
+| `use_fixture`           | Load a fixture by name                 |
 
 ## Usage
 

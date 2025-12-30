@@ -62,5 +62,5 @@ end
 
 ## License
 
-MIT License - see [LICENSE](https://github.com/jigonr/statatest/blob/main/LICENSE)
-for details.
+MIT License - see
+[LICENSE](https://github.com/jigonr/statatest/blob/main/LICENSE) for details.

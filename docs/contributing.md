@@ -1,6 +1,8 @@
 # Contributing
 
-See [CONTRIBUTING.md](https://github.com/jigonr/statatest/blob/main/CONTRIBUTING.md) in the repository root for complete contribution guidelines.
+See
+[CONTRIBUTING.md](https://github.com/jigonr/statatest/blob/main/CONTRIBUTING.md)
+in the repository root for complete contribution guidelines.
 
 ## Quick Start
 

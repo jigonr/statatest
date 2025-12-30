@@ -1,16 +1,17 @@
 # statatest GitHub Action
 
-The `jigonr/statatest/action` provides zero-install Stata testing in GitHub Actions.
+The `jigonr/statatest/action` provides zero-install Stata testing in GitHub
+Actions.
 
 ## Why Use This Action?
 
-| Without Action | With Action |
-|----------------|-------------|
-| Install Python locally | No local Python needed |
-| Install uv locally | No local uv needed |
-| Install statatest locally | No local statatest needed |
-| Configure Dockerfile manually | Just reference the action |
-| Set up license manually | Action handles license setup |
+| Without Action                | With Action                  |
+| ----------------------------- | ---------------------------- |
+| Install Python locally        | No local Python needed       |
+| Install uv locally            | No local uv needed           |
+| Install statatest locally     | No local statatest needed    |
+| Configure Dockerfile manually | Just reference the action    |
+| Set up license manually       | Action handles license setup |
 
 **You still need:**
 
@@ -59,22 +60,22 @@ jobs:
 
 ### Required
 
-| Input | Description |
-|-------|-------------|
+| Input           | Description                                               |
+| --------------- | --------------------------------------------------------- |
 | `stata-license` | Base64-encoded Stata license from `secrets.STATA_LIC_B64` |
 
 ### Optional
 
-| Input | Description | Default |
-|-------|-------------|---------|
-| `tests` | Path to test files or directory | `tests/` |
-| `coverage` | Enable coverage collection | `false` |
-| `cov-report` | Coverage report format (lcov, html) | `lcov` |
-| `junit-xml` | Path for JUnit XML output | - |
-| `marker` | Only run tests with this marker (-m) | - |
-| `keyword` | Only run tests matching keyword (-k) | - |
-| `verbose` | Enable verbose output | `false` |
-| `statatest-version` | Specific version to install | latest |
+| Input               | Description                          | Default  |
+| ------------------- | ------------------------------------ | -------- |
+| `tests`             | Path to test files or directory      | `tests/` |
+| `coverage`          | Enable coverage collection           | `false`  |
+| `cov-report`        | Coverage report format (lcov, html)  | `lcov`   |
+| `junit-xml`         | Path for JUnit XML output            | -        |
+| `marker`            | Only run tests with this marker (-m) | -        |
+| `keyword`           | Only run tests matching keyword (-k) | -        |
+| `verbose`           | Enable verbose output                | `false`  |
+| `statatest-version` | Specific version to install          | latest   |
 
 ## Examples
 
@@ -135,18 +136,18 @@ Run only tests with "regression" in the name:
   with:
     tests: tests/
     stata-license: ${{ secrets.STATA_LIC_B64 }}
-    statatest-version: '0.1.0'
+    statatest-version: "0.1.0"
 ```
 
 ## Outputs
 
 The action provides outputs for use in subsequent steps:
 
-| Output | Description |
-|--------|-------------|
+| Output   | Description            |
+| -------- | ---------------------- |
 | `passed` | Number of tests passed |
 | `failed` | Number of tests failed |
-| `total` | Total number of tests |
+| `total`  | Total number of tests  |
 
 ```yaml
 - uses: jigonr/statatest/action@v1
@@ -155,7 +156,9 @@ The action provides outputs for use in subsequent steps:
     tests: tests/
     stata-license: ${{ secrets.STATA_LIC_B64 }}
 
-- run: echo "Passed ${{ steps.tests.outputs.passed }} of ${{ steps.tests.outputs.total }} tests"
+- run:
+    echo "Passed ${{ steps.tests.outputs.passed }} of ${{
+    steps.tests.outputs.total }} tests"
 ```
 
 ## Container Setup
@@ -168,7 +171,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: dataeditors/stata18_5-mp:2025-02-26
-      options: --user root  # Required for package installation
+      options: --user root # Required for package installation
 ```
 
 See [Docker Integration](docker.md) for available images and version tags.
@@ -176,6 +179,7 @@ See [Docker Integration](docker.md) for available images and version tags.
 ## License Setup
 
 1. **Encode your license:**
+
    ```bash
    base64 -i stata.lic -o stata_lic_b64.txt
    cat stata_lic_b64.txt
@@ -216,4 +220,5 @@ Add `options: --user root` to the container configuration.
 statatest: command not found
 ```
 
-The action installs statatest automatically. If this fails, check that the container has internet access.
+The action installs statatest automatically. If this fails, check that the
+container has internet access.

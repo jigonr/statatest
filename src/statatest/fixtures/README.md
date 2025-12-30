@@ -4,8 +4,8 @@ Manage test fixtures from Python side.
 
 ## Components
 
-| File | Purpose |
-|------|---------|
+| File         | Purpose                                    |
+| ------------ | ------------------------------------------ |
 | `manager.py` | Fixture registration, activation, teardown |
 
 ## Overview
@@ -43,7 +43,8 @@ end
 
 ## Note
 
-The actual fixture implementations (panel data, networks, etc.) are in `ado/fixtures/`. This module coordinates their use from Python.
+The actual fixture implementations (panel data, networks, etc.) are in
+`ado/fixtures/`. This module coordinates their use from Python.
 
 ## Dependencies
 

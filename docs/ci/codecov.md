@@ -39,9 +39,9 @@ This generates `coverage.lcov` in LCOV format.
 2. Navigate to your repository
 3. Copy the **Repository Upload Token**
 
-!!! tip "Organization vs Repository Token"
-    - **Repository token**: Works for a single repository
-    - **Organization token**: Works for all repositories in an organization
+!!! tip "Organization vs Repository Token" - **Repository token**: Works for a
+single repository - **Organization token**: Works for all repositories in an
+organization
 
 #### Step 3: Add Token to GitHub Secrets
 
@@ -68,7 +68,7 @@ This generates `coverage.lcov` in LCOV format.
   with:
     files: coverage.lcov
     token: ${{ secrets.CODECOV_TOKEN }}
-    fail_ci_if_error: false  # Optional: don't fail CI if upload fails
+    fail_ci_if_error: false # Optional: don't fail CI if upload fails
 ```
 
 #### Complete Workflow Example
@@ -199,12 +199,12 @@ coverage:
   status:
     project:
       default:
-        target: auto      # Target = previous coverage
-        threshold: 1%     # Allow 1% drop
+        target: auto # Target = previous coverage
+        threshold: 1% # Allow 1% drop
 
     patch:
       default:
-        target: 80%       # New code must have 80% coverage
+        target: 80% # New code must have 80% coverage
 
 comment:
   layout: "reach,diff,flags,files"
@@ -282,12 +282,12 @@ coverage:
   status:
     project:
       default:
-        target: 80%    # Fail if below 80%
-        threshold: 2%  # Allow 2% drop
+        target: 80% # Fail if below 80%
+        threshold: 2% # Allow 2% drop
 
     patch:
       default:
-        target: 90%    # New code must have 90% coverage
+        target: 90% # New code must have 90% coverage
 ```
 
 ---
@@ -332,12 +332,14 @@ end_of_record
 ### Coverage Not Uploading
 
 1. **Check token is correctly set**
+
    ```bash
    # Verify secret exists in GitHub Actions
    echo "Token length: ${#CODECOV_TOKEN}"
    ```
 
 2. **Verify LCOV file exists**
+
    ```bash
    ls -la coverage.lcov
    cat coverage.lcov | head -20
@@ -355,6 +357,7 @@ end_of_record
 ### Coverage Shows 0% or Empty
 
 1. **Verify source paths** are correctly configured in `statatest.toml`:
+
    ```toml
    [tool.statatest.coverage]
    source = ["code/functions"]  # Must point to your .ado files
@@ -389,10 +392,10 @@ If coverage varies between runs:
 
 ### Token Issues
 
-| Error | Solution |
-|-------|----------|
-| `401 Unauthorized` | Token is invalid or expired |
-| `404 Not Found` | Repository not found in Codecov |
+| Error              | Solution                        |
+| ------------------ | ------------------------------- |
+| `401 Unauthorized` | Token is invalid or expired     |
+| `404 Not Found`    | Repository not found in Codecov |
 | `No coverage data` | LCOV file is empty or malformed |
 
 ---

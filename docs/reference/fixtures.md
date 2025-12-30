@@ -1,6 +1,7 @@
 # Fixtures Reference
 
-All fixtures available in statatest. All fixtures support `verbose` option for detailed output.
+All fixtures available in statatest. All fixtures support `verbose` option for
+detailed output.
 
 ## Utility Fixtures
 
@@ -14,9 +15,9 @@ fixture_seed [, seed(#) verbose]
 
 **Parameters:**
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `seed` | 12345 | Random seed value |
+| Parameter | Default | Description       |
+| --------- | ------- | ----------------- |
+| `seed`    | 12345   | Random seed value |
 
 **Example:**
 
@@ -88,12 +89,12 @@ fixture_balanced_panel [, n_units(#) n_periods(#) start_year(#) seed(#) verbose]
 
 **Parameters:**
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `n_units` | 10 | Number of panel units |
-| `n_periods` | 5 | Number of time periods |
-| `start_year` | 2015 | Starting year |
-| `seed` | 12345 | Random seed |
+| Parameter    | Default | Description            |
+| ------------ | ------- | ---------------------- |
+| `n_units`    | 10      | Number of panel units  |
+| `n_periods`  | 5       | Number of time periods |
+| `start_year` | 2015    | Starting year          |
+| `seed`       | 12345   | Random seed            |
 
 **Creates:** `id`, `year`, `value`
 
@@ -119,12 +120,12 @@ fixture_unbalanced_panel [, n_units(#) n_periods(#) start_year(#) ///
 
 **Parameters:**
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `n_units` | 20 | Number of panel units |
-| `n_periods` | 10 | Number of time periods |
-| `attrition` | 0.1 | Annual attrition rate (0-1) |
-| `entry` | 0.05 | Annual entry rate (0-1) |
+| Parameter   | Default | Description                 |
+| ----------- | ------- | --------------------------- |
+| `n_units`   | 20      | Number of panel units       |
+| `n_periods` | 10      | Number of time periods      |
+| `attrition` | 0.1     | Annual attrition rate (0-1) |
+| `entry`     | 0.05    | Annual entry rate (0-1)     |
 
 **Example:**
 
@@ -145,11 +146,11 @@ fixture_multilevel_panel [, n_groups(#) n_units(#) n_periods(#) ///
 
 **Parameters:**
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `n_groups` | 5 | Number of top-level groups |
-| `n_units` | 10 | Units per group |
-| `n_periods` | 5 | Time periods |
+| Parameter   | Default | Description                |
+| ----------- | ------- | -------------------------- |
+| `n_groups`  | 5       | Number of top-level groups |
+| `n_units`   | 10      | Units per group            |
+| `n_periods` | 5       | Time periods               |
 
 **Creates:** `group_id`, `unit_id`, `year`, `panel_id`, `value`
 
@@ -174,11 +175,11 @@ fixture_directed_network [, n_firms(#) n_edges(#) temporal seed(#) verbose]
 
 **Parameters:**
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `n_firms` | 100 | Total number of firms |
-| `n_edges` | 500 | Number of edges |
-| `temporal` | off | Add year dimension |
+| Parameter  | Default | Description           |
+| ---------- | ------- | --------------------- |
+| `n_firms`  | 100     | Total number of firms |
+| `n_edges`  | 500     | Number of edges       |
+| `temporal` | off     | Add year dimension    |
 
 **Creates:** `seller`, `buyer`, `weight` (and `year` if temporal)
 
@@ -201,12 +202,12 @@ fixture_bipartite_network [, n_workers(#) n_firms(#) n_periods(#) ///
 
 **Parameters:**
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `n_workers` | 500 | Number of workers |
-| `n_firms` | 50 | Number of firms |
-| `n_periods` | 5 | Time periods |
-| `mobility` | 0.15 | Job switching probability |
+| Parameter   | Default | Description               |
+| ----------- | ------- | ------------------------- |
+| `n_workers` | 500     | Number of workers         |
+| `n_firms`   | 50      | Number of firms           |
+| `n_periods` | 5       | Time periods              |
+| `mobility`  | 0.15    | Job switching probability |
 
 **Creates:** `worker_id`, `firm_id`, `year`, `wage`
 

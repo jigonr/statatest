@@ -4,12 +4,12 @@ Code coverage instrumentation and reporting.
 
 ## Components
 
-| File | Purpose |
-|------|---------|
-| `instrument.py` | Add coverage markers to .ado files |
+| File            | Purpose                                  |
+| --------------- | ---------------------------------------- |
+| `instrument.py` | Add coverage markers to .ado files       |
 | `aggregator.py` | Combine coverage from multiple test runs |
-| `reporter.py` | Generate LCOV and HTML reports |
-| `models.py` | FileCoverage, CoverageReport classes |
+| `reporter.py`   | Generate LCOV and HTML reports           |
+| `models.py`     | FileCoverage, CoverageReport classes     |
 
 ## How Coverage Works
 

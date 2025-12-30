@@ -4,12 +4,12 @@ Run Stata tests and parse results.
 
 ## Components
 
-| File | Purpose |
-|------|---------|
-| `executor.py` | Main test runner, subprocess management |
-| `wrapper.py` | Generate wrapper .do files for test execution |
-| `parser.py` | Parse Stata output, extract results |
-| `models.py` | Execution-specific data structures |
+| File          | Purpose                                       |
+| ------------- | --------------------------------------------- |
+| `executor.py` | Main test runner, subprocess management       |
+| `wrapper.py`  | Generate wrapper .do files for test execution |
+| `parser.py`   | Parse Stata output, extract results           |
+| `models.py`   | Execution-specific data structures            |
 
 ## Usage
 

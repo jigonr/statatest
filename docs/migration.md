@@ -118,11 +118,11 @@ display "All tests passed!"
 
 Replace manual checks with assertions:
 
-| Before | After |
-|--------|-------|
-| `if _N != 100 { ... }` | `assert_obs_count 100` |
-| `capture confirm variable x` | `assert_var_exists x` |
-| `if r(mean) != 0.5 { ... }` | `assert_equal "`r(mean)'"`, expected("0.5")` |
+| Before                                 | After                                                  |
+| -------------------------------------- | ------------------------------------------------------ |
+| `if _N != 100 { ... }`                 | `assert_obs_count 100`                                 |
+| `capture confirm variable x`           | `assert_var_exists x`                                  |
+| `if r(mean) != 0.5 { ... }`            | `assert_equal "`r(mean)'"`, expected("0.5")`           |
 | `if abs(r(mean) - 0.5) > 0.01 { ... }` | `assert_approx_equal r(mean), expected(0.5) tol(0.01)` |
 
 ### 2. Use Fixtures

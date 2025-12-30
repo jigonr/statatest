@@ -4,9 +4,9 @@ Find and parse Stata test files.
 
 ## Components
 
-| File | Purpose |
-|------|---------|
-| `finder.py` | Locate test_*.do files in directories |
+| File        | Purpose                                   |
+| ----------- | ----------------------------------------- |
+| `finder.py` | Locate test\_\*.do files in directories   |
 | `parser.py` | Extract markers, programs from test files |
 
 ## Usage

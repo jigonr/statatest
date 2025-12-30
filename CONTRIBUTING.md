@@ -1,6 +1,7 @@
 # Contributing to statatest
 
-Thank you for your interest in contributing to statatest! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to statatest! This document provides
+guidelines for contributing to the project.
 
 ## Code of Conduct
 
@@ -23,14 +24,15 @@ Before submitting an issue:
 
 ### Issue Types
 
-| Label | Use For |
-|-------|---------|
-| `bug` | Something isn't working |
-| `enhancement` | New feature requests |
-| `docs` | Documentation improvements |
-| `question` | Usage questions |
+| Label         | Use For                    |
+| ------------- | -------------------------- |
+| `bug`         | Something isn't working    |
+| `enhancement` | New feature requests       |
+| `docs`        | Documentation improvements |
+| `question`    | Usage questions            |
 
-**Note**: Discussing your idea in an issue first increases the likelihood of your PR being accepted.
+**Note**: Discussing your idea in an issue first increases the likelihood of
+your PR being accepted.
 
 ## How to Submit Pull Requests
 
@@ -57,13 +59,13 @@ git push origin feat/your-feature-name
 
 ### Branch Naming
 
-| Prefix | Use For |
-|--------|---------|
-| `feat/` | New features |
-| `fix/` | Bug fixes |
-| `docs/` | Documentation |
+| Prefix      | Use For          |
+| ----------- | ---------------- |
+| `feat/`     | New features     |
+| `fix/`      | Bug fixes        |
+| `docs/`     | Documentation    |
 | `refactor/` | Code refactoring |
-| `test/` | Test additions |
+| `test/`     | Test additions   |
 
 ### PR Checklist
 
@@ -176,15 +178,15 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Types
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Formatting, no code change |
+| Type       | Description                     |
+| ---------- | ------------------------------- |
+| `feat`     | New feature                     |
+| `fix`      | Bug fix                         |
+| `docs`     | Documentation only              |
+| `style`    | Formatting, no code change      |
 | `refactor` | Code change without feature/fix |
-| `test` | Adding tests |
-| `chore` | Maintenance tasks |
+| `test`     | Adding tests                    |
+| `chore`    | Maintenance tasks               |
 
 ### Examples
 

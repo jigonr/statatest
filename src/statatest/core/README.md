@@ -4,12 +4,12 @@ Domain models, configuration, and constants for statatest.
 
 ## Components
 
-| File | Purpose |
-|------|---------|
-| `models.py` | Data classes: TestFile, TestResult, TestSuite, CoverageData |
-| `config.py` | Configuration loading from pyproject.toml or statatest.toml |
-| `constants.py` | Framework constants, patterns, markers |
-| `logging.py` | Logging configuration |
+| File           | Purpose                                                     |
+| -------------- | ----------------------------------------------------------- |
+| `models.py`    | Data classes: TestFile, TestResult, TestSuite, CoverageData |
+| `config.py`    | Configuration loading from pyproject.toml or statatest.toml |
+| `constants.py` | Framework constants, patterns, markers                      |
+| `logging.py`   | Logging configuration                                       |
 
 ## Models
 

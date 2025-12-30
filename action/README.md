@@ -30,56 +30,57 @@ jobs:
 ### With Coverage
 
 ```yaml
-      - uses: jigonr/statatest/action@v1
-        with:
-          tests: tests/
-          stata-license: ${{ secrets.STATA_LIC_B64 }}
-          coverage: true
-          cov-report: lcov
-          junit-xml: junit.xml
+- uses: jigonr/statatest/action@v1
+  with:
+    tests: tests/
+    stata-license: ${{ secrets.STATA_LIC_B64 }}
+    coverage: true
+    cov-report: lcov
+    junit-xml: junit.xml
 
-      - uses: codecov/codecov-action@v4
-        with:
-          files: coverage.lcov
-          token: ${{ secrets.CODECOV_TOKEN }}
+- uses: codecov/codecov-action@v4
+  with:
+    files: coverage.lcov
+    token: ${{ secrets.CODECOV_TOKEN }}
 ```
 
 ### Filter Tests
 
 ```yaml
-      - uses: jigonr/statatest/action@v1
-        with:
-          tests: tests/
-          stata-license: ${{ secrets.STATA_LIC_B64 }}
-          marker: slow        # Only tests marked @slow
-          keyword: regression # Only tests matching "regression"
+- uses: jigonr/statatest/action@v1
+  with:
+    tests: tests/
+    stata-license: ${{ secrets.STATA_LIC_B64 }}
+    marker: slow # Only tests marked @slow
+    keyword: regression # Only tests matching "regression"
 ```
 
 ## Inputs
 
-| Input | Description | Required | Default |
-|-------|-------------|----------|---------|
-| `tests` | Path to test files or directory | No | `tests/` |
-| `stata-license` | Base64-encoded Stata license | **Yes** | - |
-| `coverage` | Enable coverage collection | No | `false` |
-| `cov-report` | Coverage report format (lcov, html) | No | `lcov` |
-| `junit-xml` | Path for JUnit XML output | No | - |
-| `marker` | Only run tests with this marker | No | - |
-| `keyword` | Only run tests matching keyword | No | - |
-| `verbose` | Enable verbose output | No | `false` |
-| `statatest-version` | Version of statatest to install | No | latest |
+| Input               | Description                         | Required | Default  |
+| ------------------- | ----------------------------------- | -------- | -------- |
+| `tests`             | Path to test files or directory     | No       | `tests/` |
+| `stata-license`     | Base64-encoded Stata license        | **Yes**  | -        |
+| `coverage`          | Enable coverage collection          | No       | `false`  |
+| `cov-report`        | Coverage report format (lcov, html) | No       | `lcov`   |
+| `junit-xml`         | Path for JUnit XML output           | No       | -        |
+| `marker`            | Only run tests with this marker     | No       | -        |
+| `keyword`           | Only run tests matching keyword     | No       | -        |
+| `verbose`           | Enable verbose output               | No       | `false`  |
+| `statatest-version` | Version of statatest to install     | No       | latest   |
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
+| Output   | Description            |
+| -------- | ---------------------- |
 | `passed` | Number of tests passed |
 | `failed` | Number of tests failed |
-| `total` | Total number of tests |
+| `total`  | Total number of tests  |
 
 ## License Setup
 
 1. Encode your Stata license:
+
    ```bash
    base64 -i stata.lic -o stata_lic_b64.txt
    ```
@@ -92,11 +93,11 @@ jobs:
 
 This action is designed to run inside AEA Data Editor's Stata containers:
 
-| Image | Stata Version |
-|-------|---------------|
-| `dataeditors/stata18_5-mp:2025-02-26` | 18.5 MP |
-| `dataeditors/stata18_5-se:2025-02-26` | 18.5 SE |
-| `dataeditors/stata19_5-mp:2025-12-19` | 19.5 MP |
+| Image                                 | Stata Version |
+| ------------------------------------- | ------------- |
+| `dataeditors/stata18_5-mp:2025-02-26` | 18.5 MP       |
+| `dataeditors/stata18_5-se:2025-02-26` | 18.5 SE       |
+| `dataeditors/stata19_5-mp:2025-12-19` | 19.5 MP       |
 
 Always use pinned date tags, never `latest`.
 

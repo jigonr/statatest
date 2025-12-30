@@ -195,6 +195,7 @@ r(601): license not found
 ```
 
 Check that:
+
 1. `STATA_LIC_B64` secret is correctly set
 2. License path matches Docker image location
 3. Base64 encoding is correct

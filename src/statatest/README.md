@@ -18,15 +18,15 @@ statatest/
 
 ## Module Overview
 
-| Module | Purpose |
-|--------|---------|
-| `core` | Data models (TestFile, TestResult), configuration |
-| `discovery` | Find and parse test files |
-| `execution` | Run tests in Stata, parse results |
-| `coverage` | Instrument code, aggregate coverage |
-| `fixtures` | Manage test fixtures |
-| `reporting` | Generate JUnit XML, LCOV, HTML reports |
-| `ado` | Stata commands for assertions and fixtures |
+| Module      | Purpose                                           |
+| ----------- | ------------------------------------------------- |
+| `core`      | Data models (TestFile, TestResult), configuration |
+| `discovery` | Find and parse test files                         |
+| `execution` | Run tests in Stata, parse results                 |
+| `coverage`  | Instrument code, aggregate coverage               |
+| `fixtures`  | Manage test fixtures                              |
+| `reporting` | Generate JUnit XML, LCOV, HTML reports            |
+| `ado`       | Stata commands for assertions and fixtures        |
 
 ## Entry Points
 

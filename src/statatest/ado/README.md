@@ -56,4 +56,5 @@ assert_equal `x', expected(5) verbose
 
 ## Path Setup
 
-These files are automatically added to Stata's `adopath` when running tests via statatest.
+These files are automatically added to Stata's `adopath` when running tests via
+statatest.
