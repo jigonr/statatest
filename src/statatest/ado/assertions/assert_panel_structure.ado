@@ -1,13 +1,14 @@
 *! assert_panel_structure.ado
-*! Version 1.0.0
+*! Version 1.1.0  2025-12-30
 *! Assert that data has valid panel structure (xtset)
 *!
 *! Syntax:
-*!   assert_panel_structure [panelvar timevar] [, balanced message(string)]
+*!   assert_panel_structure [panelvar timevar] [, balanced message(string) verbose]
 *!
 *! Options:
 *!   balanced      - Require balanced panel (all units have all periods)
 *!   message(str)  - Custom error message
+*!   verbose       - Show detailed output (PASS on success, full details on failure)
 *!
 *! If panelvar and timevar not specified, checks current xtset.
 *!
@@ -19,7 +20,7 @@
 program define assert_panel_structure
     version 16
     
-    syntax [varlist(min=0 max=2)] [, balanced message(string)]
+    syntax [varlist(min=0 max=2)] [, balanced message(string) Verbose]
     
     local nvars : word count `varlist'
     
@@ -27,11 +28,16 @@ program define assert_panel_structure
         // Check current xtset
         capture xtset
         if _rc != 0 {
-            display as error ""
-            display as error "ASSERTION FAILED: assert_panel_structure"
-            display as error "  Data is not xtset"
-            if "`message'" != "" {
-                display as error "  Message: `message'"
+            if "`verbose'" != "" {
+                display as error ""
+                display as error "ASSERTION FAILED: assert_panel_structure"
+                display as error "  Data is not xtset"
+                if "`message'" != "" {
+                    display as error "  Message: `message'"
+                }
+            }
+            else {
+                display as error "FAIL: assert_panel_structure: invalid panel structure"
             }
             exit 9
         }
@@ -49,12 +55,17 @@ program define assert_panel_structure
         // Try to xtset with these variables
         capture xtset `panelvar' `timevar'
         if _rc != 0 {
-            display as error ""
-            display as error "ASSERTION FAILED: assert_panel_structure"
-            display as error "  Cannot xtset with: `panelvar' `timevar'"
-            display as error "  Error code: `=_rc'"
-            if "`message'" != "" {
-                display as error "  Message: `message'"
+            if "`verbose'" != "" {
+                display as error ""
+                display as error "ASSERTION FAILED: assert_panel_structure"
+                display as error "  Cannot xtset with: `panelvar' `timevar'"
+                display as error "  Error code: `=_rc'"
+                if "`message'" != "" {
+                    display as error "  Message: `message'"
+                }
+            }
+            else {
+                display as error "FAIL: assert_panel_structure: invalid panel structure"
             }
             exit 9
         }
@@ -70,12 +81,17 @@ program define assert_panel_structure
     }
     
     if _rc != 0 {
-        display as error ""
-        display as error "ASSERTION FAILED: assert_panel_structure"
-        display as error "  Panel variables: `panelvar' `timevar'"
-        display as error "  Not uniquely identified (duplicates exist)"
-        if "`message'" != "" {
-            display as error "  Message: `message'"
+        if "`verbose'" != "" {
+            display as error ""
+            display as error "ASSERTION FAILED: assert_panel_structure"
+            display as error "  Panel variables: `panelvar' `timevar'"
+            display as error "  Not uniquely identified (duplicates exist)"
+            if "`message'" != "" {
+                display as error "  Message: `message'"
+            }
+        }
+        else {
+            display as error "FAIL: assert_panel_structure: invalid panel structure"
         }
         exit 9
     }
@@ -97,15 +113,25 @@ program define assert_panel_structure
         // Check if all units have same number of periods
         quietly summarize `n_periods_per_unit'
         if r(min) != r(max) | r(min) != `expected_periods' {
-            display as error ""
-            display as error "ASSERTION FAILED: assert_panel_structure"
-            display as error "  Panel is NOT balanced"
-            display as error "  Expected periods per unit: `expected_periods'"
-            display as error "  Actual range: `=r(min)' to `=r(max)'"
-            if "`message'" != "" {
-                display as error "  Message: `message'"
+            if "`verbose'" != "" {
+                display as error ""
+                display as error "ASSERTION FAILED: assert_panel_structure"
+                display as error "  Panel is NOT balanced"
+                display as error "  Expected periods per unit: `expected_periods'"
+                display as error "  Actual range: `=r(min)' to `=r(max)'"
+                if "`message'" != "" {
+                    display as error "  Message: `message'"
+                }
+            }
+            else {
+                display as error "FAIL: assert_panel_structure: invalid panel structure"
             }
             exit 9
         }
+    }
+    
+    // Success message (only if verbose)
+    if "`verbose'" != "" {
+        display as text "PASS: assert_panel_structure"
     }
 end

@@ -1,15 +1,16 @@
 *! fixture_directed_network.ado
-*! Version 1.0.0
+*! Version 1.1.0, 2025-12-30
 *! Creates a sparse directed weighted network for testing
 *!
 *! Syntax:
-*!   fixture_directed_network [, n_firms(#) n_edges(#) temporal seed(#)]
+*!   fixture_directed_network [, n_firms(#) n_edges(#) temporal seed(#) Verbose]
 *!
 *! Options:
 *!   n_firms(#)  - Total number of firms (default: 100)
 *!   n_edges(#)  - Number of edges/transactions (default: 500)
 *!   temporal    - Add year dimension (2015-2019)
 *!   seed(#)     - Random seed (default: 12345)
+*!   Verbose     - Display fixture creation details
 *!
 *! Creates variables:
 *!   seller  - Seller firm ID (source node)
@@ -27,7 +28,13 @@
 program define fixture_directed_network
     version 16
     
-    syntax [, n_firms(integer 100) n_edges(integer 500) temporal seed(integer 12345)]
+    syntax [, n_firms(integer 100) n_edges(integer 500) temporal seed(integer 12345) Verbose]
+    
+    // Display creation message if verbose
+    if "`verbose'" != "" {
+        local temp_msg = cond("`temporal'" != "", "temporal", "cross-sectional")
+        display as text "Creating directed network: n_firms=`n_firms', n_edges=`n_edges', type=`temp_msg'"
+    }
     
     clear
     set seed `seed'
@@ -96,7 +103,11 @@ program define fixture_directed_network
     return scalar n_firms = `n_firms'
     return scalar n_sellers = `n_sellers'
     return scalar n_buyers = `n_buyers'
+    
+    // Display completion message if verbose
+    if "`verbose'" != "" {
+        display as text "Fixture created: directed_network"
+    }
 end
-
 </antml9:parameter>
 

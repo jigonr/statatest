@@ -1,8 +1,8 @@
-*! assert_count v1.0.0  statatest  2025-12-30
+*! assert_count v1.1.0  statatest  2025-12-30
 *! Assert that the dataset has the expected number of observations.
 *!
 *! Syntax:
-*!   assert_count, expected(integer) [if] [message(string)]
+*!   assert_count, expected(integer) [if] [message(string)] [Verbose]
 *!
 *! Examples:
 *!   sysuse auto, clear
@@ -12,7 +12,7 @@
 program define assert_count, rclass
     version 16
 
-    syntax [if], Expected(integer) [Message(string)]
+    syntax [if], Expected(integer) [Message(string)] [Verbose]
 
     // Count observations (with optional if condition)
     if `"`if'"' != "" {
@@ -25,16 +25,24 @@ program define assert_count, rclass
 
     // Compare actual vs expected
     if `actual' != `expected' {
-        display as error "ASSERTION FAILED: assert_count"
-        display as error "  Expected: `expected' observations"
-        display as error "  Actual:   `actual' observations"
-        if `"`message'"' != "" {
-            display as error "  Message:  `message'"
+        if "`verbose'" != "" {
+            display as error "ASSERTION FAILED: assert_count"
+            display as error "  Expected: `expected' observations"
+            display as error "  Actual:   `actual' observations"
+            if `"`message'"' != "" {
+                display as error "  Message:  `message'"
+            }
+        }
+        else {
+            display as error "FAIL: assert_count: `actual' != `expected' observations"
         }
         noisily display "_STATATEST_FAIL_:assert_count_:`actual' != `expected'_END_"
         exit 9
     }
 
+    if "`verbose'" != "" {
+        display as text "PASS: assert_count"
+    }
     noisily display "_STATATEST_PASS_:assert_count_"
 
     return local passed "1"
