@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New assertions:
+  - `assert_count` - Check dataset observation count
+  - `assert_var_type` - Check variable type (numeric, string, specific)
+  - `assert_label_exists` - Check variable has value labels attached
+- `verbose` option for all assertions and fixtures:
+  - Default: Minimal one-line error messages
+  - Verbose: Detailed multi-line diagnostic output
+- Documentation:
+  - `CONTRIBUTING.md` with contribution guidelines
+  - README.md for all source modules (13 files)
+  - Use case documentation (panel data, network data)
 - Panel data fixtures (merged from econ extension):
   - `fixture_balanced_panel` - Balanced panel data
   - `fixture_unbalanced_panel` - Panel with attrition, entry, gaps
@@ -47,6 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Centralized all constants in `core/constants.py`
 - Replaced `rich` library with Python standard logging + ANSI colors
 - Merged [econ] extension into main package (no separate install needed)
+- Merged econ documentation into main reference (removed extensions section)
+- Updated mkdocs navigation with Use Cases section
 - Improved path handling with `importlib.resources`
 
 ### Removed
