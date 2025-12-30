@@ -97,7 +97,7 @@ def instrument_file(source_path: Path, dest_path: Path) -> dict[int, int]:
         if should_instrument_line(line, in_continuation=in_continuation):
             # Insert SMCL coverage marker before the line
             # Format: display `"{* COV:filename:lineno }"'
-            marker = f"display `\"{{* COV:{filename}:{orig_lineno} }}\"'"
+            marker = f'display `"{{* COV:{filename}:{orig_lineno} }}"\''
             instrumented_lines.append(marker)
             line_map[len(instrumented_lines)] = orig_lineno
             instrumented_lines.append(line)
