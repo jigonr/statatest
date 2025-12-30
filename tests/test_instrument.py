@@ -172,7 +172,7 @@ class TestSetupInstrumentedEnvironment:
                 "program define test\n    gen x = 1\nend\n"
             )
 
-            instrumented_dir, maps = setup_instrumented_environment(
+            instrumented_dir, _maps = setup_instrumented_environment(
                 [source_dir], tmppath
             )
 

@@ -1,5 +1,6 @@
 """Tests for runner module."""
 
+import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -7,7 +8,7 @@ from unittest.mock import MagicMock, patch
 from statatest.core.config import Config
 from statatest.core.models import TestFile
 from statatest.execution import run_tests
-from statatest.execution.executor import _get_ado_paths
+from statatest.execution.executor import _get_ado_paths, _run_single_test
 from statatest.execution.parser import (
     extract_error_message as _extract_error_message,
 )
@@ -286,10 +287,6 @@ class TestRunSingleTest:
     @patch("statatest.fixtures.discover_conftest")
     def test_handles_timeout(self, mock_conftest, mock_ado, mock_subprocess):
         """Test handling of subprocess timeout."""
-        import subprocess
-
-        from statatest.execution.executor import _run_single_test
-
         mock_ado.return_value = {}
         mock_conftest.return_value = []
         mock_subprocess.side_effect = subprocess.TimeoutExpired(
@@ -313,8 +310,6 @@ class TestRunSingleTest:
     @patch("statatest.fixtures.discover_conftest")
     def test_handles_file_not_found(self, mock_conftest, mock_ado, mock_subprocess):
         """Test handling when Stata executable is not found."""
-        from statatest.execution.executor import _run_single_test
-
         mock_ado.return_value = {}
         mock_conftest.return_value = []
         mock_subprocess.side_effect = FileNotFoundError()
