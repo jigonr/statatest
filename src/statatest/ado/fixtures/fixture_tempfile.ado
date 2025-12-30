@@ -1,4 +1,4 @@
-*! fixture_tempfile v1.0.0  statatest  2025-12-26
+*! fixture_tempfile v1.1.0  statatest  2025-12-30
 *! Author: Jose Ignacio Gonzalez Rojas
 *!
 *! Built-in fixture: Creates a temporary file path.
@@ -8,7 +8,7 @@
 *! after the test.
 *!
 *! Syntax:
-*!   fixture_tempfile [, scope(string) suffix(string)]
+*!   fixture_tempfile [, scope(string) suffix(string) Verbose]
 *!
 *! Example:
 *!   use_fixture tempfile
@@ -17,11 +17,16 @@
 program define fixture_tempfile, rclass
     version 16
 
-    syntax [, Scope(string) SUFfix(string)]
+    syntax [, Scope(string) SUFfix(string) Verbose]
 
     // Default suffix is .dta
     if `"`suffix'"' == "" {
         local suffix ".dta"
+    }
+
+    // Display creation message if verbose
+    if "`verbose'" != "" {
+        display as text "Creating temporary file path: suffix=`suffix'"
     }
 
     // Generate temporary file path
@@ -33,6 +38,11 @@ program define fixture_tempfile, rclass
 
     // Store for cleanup tracking
     global _FIXTURE_tempfile_cleanup "`filepath'"
+
+    // Display completion message if verbose
+    if "`verbose'" != "" {
+        display as text "Fixture created: tempfile"
+    }
 
     return local path "`filepath'"
 end

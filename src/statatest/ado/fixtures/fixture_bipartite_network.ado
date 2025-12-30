@@ -1,11 +1,11 @@
 *! fixture_bipartite_network.ado
-*! Version 1.0.0
+*! Version 1.1.0, 2025-12-30
 *! Creates a bipartite network (two distinct node types) for testing
 *! Default structure: employer-employee (AKM-style)
 *!
 *! Syntax:
 *!   fixture_bipartite_network [, n_workers(#) n_firms(#) n_periods(#) ///
-*!                                 start_year(#) mobility(#) seed(#)]
+*!                                 start_year(#) mobility(#) seed(#) Verbose]
 *!
 *! Options:
 *!   n_workers(#)  - Number of workers (default: 500)
@@ -14,6 +14,7 @@
 *!   start_year(#) - Starting year (default: 2015)
 *!   mobility(#)   - Job mobility rate 0-1 (default: 0.15)
 *!   seed(#)       - Random seed (default: 12345)
+*!   Verbose       - Display fixture creation details
 *!
 *! Creates variables:
 *!   worker_id - Worker identifier (1 to n_workers)
@@ -31,7 +32,12 @@ program define fixture_bipartite_network
     version 16
     
     syntax [, n_workers(integer 500) n_firms(integer 50) n_periods(integer 5) ///
-              start_year(integer 2015) mobility(real 0.15) seed(integer 12345)]
+              start_year(integer 2015) mobility(real 0.15) seed(integer 12345) Verbose]
+    
+    // Display creation message if verbose
+    if "`verbose'" != "" {
+        display as text "Creating bipartite network: n_workers=`n_workers', n_firms=`n_firms', n_periods=`n_periods', mobility=`mobility'"
+    }
     
     clear
     set seed `seed'
@@ -111,6 +117,11 @@ program define fixture_bipartite_network
     return scalar n_firms = `n_firms'
     return scalar n_periods = `n_periods'
     return scalar mobility = `mobility'
+    
+    // Display completion message if verbose
+    if "`verbose'" != "" {
+        display as text "Fixture created: bipartite_network"
+    }
 end
 
 // Alias for employer-employee data

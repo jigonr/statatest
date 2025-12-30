@@ -1,10 +1,10 @@
-*! fixture_seed v1.0.0  statatest  2025-12-26
+*! fixture_seed v1.1.0  statatest  2025-12-30
 *! Author: Jose Ignacio Gonzalez Rojas
 *!
 *! Built-in fixture: Sets a reproducible random seed.
 *!
 *! Syntax:
-*!   fixture_seed [, scope(string) seed(integer)]
+*!   fixture_seed [, scope(string) seed(integer) Verbose]
 *!
 *! Example:
 *!   use_fixture seed
@@ -16,7 +16,12 @@
 program define fixture_seed, rclass
     version 16
 
-    syntax [, Scope(string) SEED(integer 12345)]
+    syntax [, Scope(string) SEED(integer 12345) Verbose]
+
+    // Display creation message if verbose
+    if "`verbose'" != "" {
+        display as text "Setting random seed: seed=`seed'"
+    }
 
     // Store original seed state for restoration
     local original_seed = c(rngstate)
@@ -24,6 +29,11 @@ program define fixture_seed, rclass
 
     // Set reproducible seed
     set seed `seed'
+
+    // Display completion message if verbose
+    if "`verbose'" != "" {
+        display as text "Fixture created: seed"
+    }
 
     return local seed "`seed'"
 end

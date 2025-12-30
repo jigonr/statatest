@@ -1,10 +1,10 @@
-*! use_fixture v1.0.0  statatest  2025-12-26
+*! use_fixture v1.1.0  statatest  2025-12-30
 *! Author: Jose Ignacio Gonzalez Rojas
 *!
 *! Request a fixture by name, invoking setup if needed.
 *!
 *! Syntax:
-*!   use_fixture name [, scope(string)]
+*!   use_fixture name [, scope(string) Verbose]
 *!
 *! Scopes:
 *!   - function (default): Setup/teardown per test function
@@ -18,7 +18,7 @@
 program define use_fixture, rclass
     version 16
 
-    syntax anything(name=fixture_name), [Scope(string)]
+    syntax anything(name=fixture_name), [Scope(string) Verbose]
 
     // Default scope is function
     if `"`scope'"' == "" {
@@ -52,8 +52,13 @@ program define use_fixture, rclass
         exit 111
     }
 
-    // Run fixture setup
-    `setup_prog', scope(`scope')
+    // Run fixture setup (pass verbose if specified)
+    if "`verbose'" != "" {
+        `setup_prog', scope(`scope') verbose
+    }
+    else {
+        `setup_prog', scope(`scope')
+    }
 
     // Mark fixture as active
     scalar `fixture_var' = 1

@@ -1,10 +1,10 @@
-*! fixture_empty_dataset v1.0.0  statatest  2025-12-26
+*! fixture_empty_dataset v1.1.0  statatest  2025-12-30
 *! Author: Jose Ignacio Gonzalez Rojas
 *!
 *! Built-in fixture: Creates an empty dataset with specified observations.
 *!
 *! Syntax:
-*!   fixture_empty_dataset [, scope(string) obs(integer)]
+*!   fixture_empty_dataset [, scope(string) obs(integer) Verbose]
 *!
 *! Example:
 *!   use_fixture empty_dataset
@@ -16,7 +16,12 @@
 program define fixture_empty_dataset, rclass
     version 16
 
-    syntax [, Scope(string) OBS(integer 0)]
+    syntax [, Scope(string) OBS(integer 0) Verbose]
+
+    // Display creation message if verbose
+    if "`verbose'" != "" {
+        display as text "Creating empty dataset: obs=`obs'"
+    }
 
     // Clear current data
     clear
@@ -24,6 +29,11 @@ program define fixture_empty_dataset, rclass
     // Set observations if specified
     if `obs' > 0 {
         quietly set obs `obs'
+    }
+
+    // Display completion message if verbose
+    if "`verbose'" != "" {
+        display as text "Fixture created: empty_dataset"
     }
 
     return local obs "`obs'"

@@ -1,10 +1,10 @@
 *! fixture_unbalanced_panel.ado
-*! Version 1.0.0
+*! Version 1.1.0, 2025-12-30
 *! Creates an unbalanced panel dataset with gaps for testing
 *!
 *! Syntax:
 *!   fixture_unbalanced_panel [, n_units(#) n_periods(#) start_year(#) ///
-*!                               attrition(#) entry(#) seed(#)]
+*!                               attrition(#) entry(#) seed(#) Verbose]
 *!
 *! Options:
 *!   n_units(#)    - Number of panel units (default: 20)
@@ -13,6 +13,7 @@
 *!   attrition(#)  - Annual attrition rate 0-1 (default: 0.1)
 *!   entry(#)      - Annual entry rate 0-1 (default: 0.05)
 *!   seed(#)       - Random seed (default: 12345)
+*!   Verbose       - Display fixture creation details
 *!
 *! Creates variables:
 *!   id    - Panel unit identifier
@@ -28,7 +29,12 @@ program define fixture_unbalanced_panel
     version 16
     
     syntax [, n_units(integer 20) n_periods(integer 10) start_year(integer 2010) ///
-              attrition(real 0.1) entry(real 0.05) seed(integer 12345)]
+              attrition(real 0.1) entry(real 0.05) seed(integer 12345) Verbose]
+    
+    // Display creation message if verbose
+    if "`verbose'" != "" {
+        display as text "Creating unbalanced panel: n_units=`n_units', n_periods=`n_periods', attrition=`attrition', entry=`entry'"
+    }
     
     clear
     set seed `seed'
@@ -97,6 +103,11 @@ program define fixture_unbalanced_panel
     quietly distinct id
     return scalar n_units = r(ndistinct)
     return scalar n_periods = `n_periods'
+    
+    // Display completion message if verbose
+    if "`verbose'" != "" {
+        display as text "Fixture created: unbalanced_panel"
+    }
 end
 
 // Alias

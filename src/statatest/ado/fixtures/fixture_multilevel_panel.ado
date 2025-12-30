@@ -1,10 +1,10 @@
 *! fixture_multilevel_panel.ado
-*! Version 1.0.0
+*! Version 1.1.0, 2025-12-30
 *! Creates a multilevel/hierarchical panel dataset for testing
 *!
 *! Syntax:
 *!   fixture_multilevel_panel [, n_groups(#) n_units(#) n_periods(#) ///
-*!                               start_year(#) seed(#)]
+*!                               start_year(#) seed(#) Verbose]
 *!
 *! Options:
 *!   n_groups(#)   - Number of top-level groups (default: 5)
@@ -12,6 +12,7 @@
 *!   n_periods(#)  - Number of time periods (default: 5)
 *!   start_year(#) - Starting year (default: 2015)
 *!   seed(#)       - Random seed (default: 12345)
+*!   Verbose       - Display fixture creation details
 *!
 *! Creates variables:
 *!   group_id  - Top-level group identifier (e.g., country, industry)
@@ -28,7 +29,12 @@ program define fixture_multilevel_panel
     version 16
     
     syntax [, n_groups(integer 5) n_units(integer 10) n_periods(integer 5) ///
-              start_year(integer 2015) seed(integer 12345)]
+              start_year(integer 2015) seed(integer 12345) Verbose]
+    
+    // Display creation message if verbose
+    if "`verbose'" != "" {
+        display as text "Creating multilevel panel: n_groups=`n_groups', n_units=`n_units', n_periods=`n_periods'"
+    }
     
     clear
     set seed `seed'
@@ -83,6 +89,11 @@ program define fixture_multilevel_panel
     return scalar n_units = `n_units'
     return scalar n_periods = `n_periods'
     return scalar n_obs = `n_obs'
+    
+    // Display completion message if verbose
+    if "`verbose'" != "" {
+        display as text "Fixture created: multilevel_panel"
+    }
 end
 
 // Aliases for common multilevel structures

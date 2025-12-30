@@ -1,8 +1,8 @@
-*! assert_var_type v1.0.0  statatest  2025-12-30
+*! assert_var_type v1.1.0  statatest  2025-12-30
 *! Assert that a variable has the expected type.
 *!
 *! Syntax:
-*!   assert_var_type varname, type(string) [message(string)]
+*!   assert_var_type varname, type(string) [message(string)] [Verbose]
 *!
 *! Type options: numeric, string, byte, int, long, float, double, str#
 *!
@@ -15,7 +15,7 @@
 program define assert_var_type, rclass
     version 16
     
-    syntax varname, Type(string) [Message(string)]
+    syntax varname, Type(string) [Message(string)] [Verbose]
     
     // Get actual type using extended macro function
     local actual_type : type `varlist'
@@ -43,17 +43,25 @@ program define assert_var_type, rclass
     }
     
     if `type_match' == 0 {
-        display as error "ASSERTION FAILED: assert_var_type"
-        display as error "  Variable: `varlist'"
-        display as error "  Expected type: `type'"
-        display as error "  Actual type:   `actual_type'"
-        if `"`message'"' != "" {
-            display as error "  Message:  `message'"
+        if "`verbose'" != "" {
+            display as error "ASSERTION FAILED: assert_var_type"
+            display as error "  Variable: `varlist'"
+            display as error "  Expected type: `type'"
+            display as error "  Actual type:   `actual_type'"
+            if `"`message'"' != "" {
+                display as error "  Message:  `message'"
+            }
+        }
+        else {
+            display as error "FAIL: assert_var_type: `varlist' is `actual_type' not `type'"
         }
         noisily display "_STATATEST_FAIL_:assert_var_type_:`varlist' is `actual_type' not `type'_END_"
         exit 9
     }
     
+    if "`verbose'" != "" {
+        display as text "PASS: assert_var_type"
+    }
     noisily display "_STATATEST_PASS_:assert_var_type_"
     
     return local passed "1"
