@@ -190,7 +190,7 @@ Cache pip packages for faster builds:
 
 ### License Issues
 
-```
+```stata
 r(601): license not found
 ```
 
@@ -202,7 +202,7 @@ Check that:
 
 ### Permission Denied
 
-```
+```console
 stata-mp: Permission denied
 ```
 

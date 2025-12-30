@@ -8,7 +8,7 @@ Common issues and solutions when using statatest.
 
 **Symptom:**
 
-```
+```console
 bash: statatest: command not found
 ```
 
@@ -37,6 +37,7 @@ bash: statatest: command not found
    ```
 
 3. **Run via Python module:**
+
    ```bash
    python -m statatest tests/
    ```
@@ -49,7 +50,7 @@ bash: statatest: command not found
 
 **Symptom:**
 
-```
+```console
 Error: Stata executable not found
 ```
 
@@ -88,7 +89,7 @@ Error: Stata executable not found
 
 **Symptom:**
 
-```
+```console
 stata-mp: Permission denied
 ```
 
@@ -107,6 +108,7 @@ stata-mp: Permission denied
    ```
 
 3. **In Docker/CI, run as root:**
+
    ```yaml
    container:
      image: dataeditors/stata18:latest
@@ -117,7 +119,7 @@ stata-mp: Permission denied
 
 **Symptom:**
 
-```
+```stata
 r(601): license not found
 ```
 
@@ -152,7 +154,7 @@ r(601): license not found
 
 **Symptom:**
 
-```
+```console
 Found 0 test file(s)
 ```
 
@@ -177,6 +179,7 @@ Found 0 test file(s)
    ```
 
 4. **Use custom pattern:**
+
    ```toml
    [tool.statatest]
    test_files = ["test_*.do", "*_test.do"]
@@ -231,6 +234,7 @@ Found 0 test file(s)
    ```
 
 3. **Check instrumentation directory:**
+
    ```bash
    ls -la .statatest/instrumented/
    ```
@@ -252,6 +256,7 @@ Found 0 test file(s)
    - Verify `.smcl` logs are generated
 
 3. **Check source file instrumentation:**
+
    ```bash
    # Instrumented files should have COV markers
    grep "COV:" .statatest/instrumented/*.ado
@@ -271,6 +276,7 @@ Found 0 test file(s)
    - Random values may cause different branches to execute
 
 3. **Use carryforward in Codecov:**
+
    ```yaml
    # codecov.yml
    flags:
@@ -305,6 +311,7 @@ Found 0 test file(s)
    ```
 
 3. **Check numeric precision:**
+
    ```stata
    // Use assert_approx_equal for floats
    assert_approx_equal `r(mean)', expected(0.5) tol(0.001)
@@ -324,6 +331,7 @@ Found 0 test file(s)
    ```
 
 2. **Check for missing values:**
+
    ```stata
    // Missing values will fail comparison
    assert_true !missing(`r(mean)')
@@ -338,7 +346,7 @@ Found 0 test file(s)
 
 **Symptom:**
 
-```
+```console
 Error: Fixture 'sample_data' not found
 ```
 
@@ -430,6 +438,7 @@ Error: Fixture 'sample_data' not found
    ```
 
 3. **Upload as artifact:**
+
    ```yaml
    - uses: actions/upload-artifact@v4
      if: always()
@@ -457,6 +466,7 @@ Error: Fixture 'sample_data' not found
    - Split into multiple test files for parallel CI jobs
 
 3. **Profile Stata execution:**
+
    ```bash
    time statatest tests/ --verbose
    ```
@@ -482,6 +492,7 @@ Error: Fixture 'sample_data' not found
    ```
 
 3. **Increase Stata memory:**
+
    ```stata
    set maxvar 10000
    set matsize 5000

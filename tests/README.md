@@ -4,7 +4,7 @@ Python test suite for statatest.
 
 ## Structure
 
-```
+```plaintext
 tests/
 ├── conftest.py         # Shared pytest fixtures
 ├── test_cli.py         # CLI tests

@@ -225,20 +225,20 @@ Codecov automatically adds comments to pull requests showing:
 
 Example PR comment:
 
-```
+```markdown
 ## Coverage Report
 
-| Coverage | Status |
-|----------|--------|
+| Coverage | Status           |
+| -------- | ---------------- |
 | Project  | 85.3% (+0.5%) ✅ |
-| Patch    | 92.1% ✅ |
+| Patch    | 92.1% ✅         |
 
 ### Files Changed
 
-| File | Coverage | Lines |
-|------|----------|-------|
-| myfunction.ado | 90% | 18/20 |
-| helper.ado | 75% | 15/20 |
+| File           | Coverage | Lines |
+| -------------- | -------- | ----- |
+| myfunction.ado | 90%      | 18/20 |
+| helper.ado     | 75%      | 15/20 |
 ```
 
 ---
@@ -296,7 +296,7 @@ coverage:
 
 Add a coverage badge to your README:
 
-```markdown
+```{markdown}
 [![codecov](https://codecov.io/gh/username/repo/branch/main/graph/badge.svg)](https://codecov.io/gh/username/repo)
 ```
 
@@ -308,7 +308,7 @@ Replace `username/repo` with your repository path.
 
 statatest generates LCOV format coverage:
 
-```
+```lcov
 TN:statatest
 SF:myfunction.ado
 DA:5,1
@@ -348,6 +348,7 @@ end_of_record
 3. **Check Codecov action logs** for specific error messages
 
 4. **Test upload manually**
+
    ```bash
    curl -Os https://cli.codecov.io/latest/linux/codecov
    chmod +x codecov
@@ -368,6 +369,7 @@ end_of_record
    - Coverage markers are invisible `{* COV:file:line }` comments
 
 3. **Verify files are being instrumented**
+
    ```bash
    ls -la .statatest/instrumented/
    ```
@@ -376,10 +378,12 @@ end_of_record
 
 1. Add more tests covering edge cases
 2. Use coverage HTML report to identify uncovered lines:
+
    ```bash
    statatest tests/ --coverage --cov-report=html
    open htmlcov/index.html
    ```
+
 3. Focus on testing error paths and boundary conditions
 
 ### Flaky Coverage

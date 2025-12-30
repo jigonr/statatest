@@ -135,7 +135,7 @@ statatest tests/ --config=myconfig.toml
 
 ### Default
 
-```
+```console
 statatest v0.1.0
 Collecting tests from: tests
 Found 5 test file(s)
@@ -148,7 +148,7 @@ Found 5 test file(s)
 
 ### Verbose
 
-```
+```console
 statatest v0.1.0
 Collecting tests from: tests
 Found 5 test file(s)
@@ -165,7 +165,7 @@ Running: tests/test_file.do PASSED (0.28s)
 
 ### With Coverage
 
-```
+```console
 statatest v0.1.0
 Collecting tests from: tests
 Found 5 test file(s)

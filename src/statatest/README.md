@@ -4,7 +4,7 @@ Testing framework for Stata code with Python orchestration.
 
 ## Architecture
 
-```
+```plaintext
 statatest/
 ├── cli.py              # Command-line interface
 ├── core/               # Domain models and configuration
@@ -36,7 +36,7 @@ statatest/
 
 ## Data Flow
 
-```
+```plaintext
 1. Discovery: Find test_*.do files
 2. Parsing: Extract markers, programs, fixtures
 3. Execution: Run each test in Stata subprocess

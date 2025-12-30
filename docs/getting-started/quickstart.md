@@ -28,7 +28,7 @@ statatest tests/
 
 Output:
 
-```
+```console
 statatest v0.1.0
 Collecting tests from: tests
 Found 1 test file(s)
@@ -47,7 +47,7 @@ statatest tests/ --verbose
 
 Output:
 
-```
+```console
 statatest v0.1.0
 Collecting tests from: tests
 Found 1 test file(s)

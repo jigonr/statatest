@@ -35,7 +35,7 @@ end
 
 ## Fixture Flow
 
-```
+```plaintext
 1. Before test: Execute setup programs
 2. Test execution: Fixture data available
 3. After test: Execute teardown programs

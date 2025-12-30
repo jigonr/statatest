@@ -41,7 +41,7 @@ statatest --version
 
 Should output:
 
-```
+```console
 statatest version 0.1.0
 ```
 

@@ -30,7 +30,7 @@ statatest tests/ --coverage --cov-report=lcov
 
 Creates `coverage.lcov` in LCOV format:
 
-```
+```lcov
 TN:statatest
 SF:myfunction.ado
 DA:5,1
@@ -66,7 +66,7 @@ omit = ["tests/*", "*_test.ado"]
 
 ### Console Output
 
-```
+```console
 ============================================================
 Coverage: 85.3%
   myfunction.ado: 90% (18/20 lines)

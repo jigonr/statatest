@@ -93,7 +93,7 @@ use_fixture sample_panel, scope(module)
 
 statatest automatically discovers `conftest.do` files:
 
-```
+```plaintext
 tests/
 ├── conftest.do          # Root fixtures
 ├── unit/

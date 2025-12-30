@@ -168,7 +168,7 @@ end
 
 We use [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```plaintext
 <type>(<scope>): <description>
 
 [optional body]
@@ -219,7 +219,7 @@ BREAKING CHANGE: TestResult class renamed to ExecutionResult
 
 ### Test Organization
 
-```
+```plaintext
 tests/
 ├── test_cli.py          # CLI tests
 ├── test_coverage.py     # Coverage module tests

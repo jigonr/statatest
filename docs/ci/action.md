@@ -192,6 +192,7 @@ See [Docker Integration](docker.md) for available images and version tags.
    - Value: Paste the base64 content
 
 3. **Reference in workflow:**
+
    ```yaml
    stata-license: ${{ secrets.STATA_LIC_B64 }}
    ```
@@ -200,7 +201,7 @@ See [Docker Integration](docker.md) for available images and version tags.
 
 ### License Not Found
 
-```
+```console
 stata.lic not found
 ```
 
@@ -208,7 +209,7 @@ Ensure `STATA_LIC_B64` secret is set and the action has access to it.
 
 ### Permission Denied
 
-```
+```console
 Permission denied
 ```
 
@@ -216,7 +217,7 @@ Add `options: --user root` to the container configuration.
 
 ### statatest Not Found
 
-```
+```console
 statatest: command not found
 ```
 

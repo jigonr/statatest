@@ -162,7 +162,7 @@ assert_file_exists "$HOME/config.txt"
 
 All assertions provide detailed failure messages:
 
-```
+```console
 ASSERTION FAILED: assert_equal
   Expected: 100
   Actual:   99

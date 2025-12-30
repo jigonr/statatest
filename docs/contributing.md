@@ -22,7 +22,7 @@ uv run mypy src/ --strict
 
 ## Commit Format
 
-```
+```plaintext
 <type>(<scope>): <description>
 ```
 

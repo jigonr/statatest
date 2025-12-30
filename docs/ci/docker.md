@@ -130,6 +130,7 @@ Store the license as a base64-encoded secret:
    - Create `STATA_LIC_B64` with the base64 content
 
 3. **Decode in workflow:**
+
    ```yaml
    - name: Decode Stata license
      run: echo "${{ secrets.STATA_LIC_B64 }}" | base64 -d > stata.lic

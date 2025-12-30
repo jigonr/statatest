@@ -4,7 +4,7 @@ Stata commands for testing: assertions and fixtures.
 
 ## Structure
 
-```
+```plaintext
 ado/
 ├── assertions/     # Test assertion commands
 │   ├── assert_equal.ado

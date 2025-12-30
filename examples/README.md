@@ -8,7 +8,7 @@ Example projects demonstrating statatest usage.
 
 Basic example showing minimal test setup:
 
-```
+```plaintext
 simple/
 ├── src/
 │   └── myprogram.ado    # Code to test
@@ -28,7 +28,7 @@ statatest tests/
 
 Example using fixtures for test data:
 
-```
+```plaintext
 fixtures/
 ├── tests/
 │   ├── conftest.do         # Shared fixtures

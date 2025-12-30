@@ -35,7 +35,7 @@ end
 
 ### 2. Marker Format
 
-```
+```plaintext
 {* COV:filename:linenumber }
 ```
 
