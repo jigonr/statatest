@@ -25,21 +25,39 @@ from statatest.core.constants import (
 _SKIP_REGEX = re.compile("|".join(INSTRUMENT_SKIP_PATTERNS), re.IGNORECASE)
 
 
-def should_instrument_line(line: str) -> bool:
-    """Check if a line should be instrumented.
+def _ends_with_continuation(line: str) -> bool:
+    """Check if line ends with continuation marker (///).
+
+    In Stata, /// at the end of a line continues the command to the next line.
+    This is common for long commands that exceed 80 characters.
 
     Args:
         line: The source code line.
 
     Returns:
+        True if line ends with /// (continues to next line).
+    """
+    return line.rstrip().endswith("///")
+
+
+def should_instrument_line(line: str, in_continuation: bool = False) -> bool:
+    """Check if a line should be instrumented.
+
+    Args:
+        line: The source code line.
+        in_continuation: Whether this line is part of a multi-line command
+            started with /// on a previous line.
+
+    Returns:
         True if the line should be instrumented.
     """
-    # Skip lines matching skip patterns
-    if _SKIP_REGEX.match(line):
-        return False
+    # If we're in a continuation, always instrument the line
+    # (it's part of an executable command spanning multiple lines)
+    if in_continuation:
+        return True
 
-    # Skip continuation lines (start with ///)
-    if line.strip().startswith("///"):
+    # Skip lines matching skip patterns (comments, empty, structural)
+    if _SKIP_REGEX.match(line):
         return False
 
     # Skip lines that are just closing braces or keywords
@@ -49,6 +67,9 @@ def should_instrument_line(line: str) -> bool:
 
 def instrument_file(source_path: Path, dest_path: Path) -> dict[int, int]:
     """Instrument a single .ado file with SMCL coverage markers.
+
+    Handles Stata continuation lines (///) so that all lines of a multi-line
+    command are instrumented and reported as covered.
 
     Args:
         source_path: Path to the original .ado file
@@ -69,16 +90,23 @@ def instrument_file(source_path: Path, dest_path: Path) -> dict[int, int]:
     ]
     filename = source_path.name
 
+    # Track continuation state across lines
+    in_continuation = False
+
     for orig_lineno, line in enumerate(lines, start=1):
-        if should_instrument_line(line):
+        if should_instrument_line(line, in_continuation=in_continuation):
             # Insert SMCL coverage marker before the line
             # Format: display `"{* COV:filename:lineno }"'
-            marker = f'display `"{{* COV:{filename}:{orig_lineno} }}"\'  '
+            marker = f"display `\"{{* COV:{filename}:{orig_lineno} }}\"'"
             instrumented_lines.append(marker)
             line_map[len(instrumented_lines)] = orig_lineno
             instrumented_lines.append(line)
         else:
             instrumented_lines.append(line)
+
+        # Update continuation state for next line
+        # If current line ends with ///, next line is a continuation
+        in_continuation = _ends_with_continuation(line)
 
     # Write instrumented file
     dest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -162,6 +190,9 @@ def cleanup_instrumented_environment(work_dir: Path) -> None:
 def get_total_lines(source_path: Path) -> set[int]:
     """Get the set of instrumentable line numbers in a source file.
 
+    Handles Stata continuation lines (///) so that all lines of a multi-line
+    command are counted as instrumentable.
+
     Args:
         source_path: Path to the source file
 
@@ -173,8 +204,14 @@ def get_total_lines(source_path: Path) -> set[int]:
 
     total_lines: set[int] = set()
 
+    # Track continuation state across lines
+    in_continuation = False
+
     for lineno, line in enumerate(lines, start=1):
-        if should_instrument_line(line):
+        if should_instrument_line(line, in_continuation=in_continuation):
             total_lines.add(lineno)
+
+        # Update continuation state for next line
+        in_continuation = _ends_with_continuation(line)
 
     return total_lines

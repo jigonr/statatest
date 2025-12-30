@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 from statatest.coverage.instrument import (
+    _ends_with_continuation,
     cleanup_instrumented_environment,
     get_total_lines,
     instrument_directory,
@@ -49,10 +50,20 @@ class TestShouldInstrumentLine:
         assert not should_instrument_line("    args x y z")
         assert not should_instrument_line("    marksample touse")
 
-    def test_skip_continuation_lines(self):
-        """Continuation lines should not be instrumented."""
+    def test_skip_continuation_start_lines(self):
+        """Lines that only contain /// should not be instrumented."""
+        # Lines that are ONLY continuation markers (start with ///) are skipped
         assert not should_instrument_line("///")
-        assert not should_instrument_line("    /// continuation")
+        assert not should_instrument_line("    /// continuation comment")
+
+    def test_continuation_context_instruments_all_lines(self):
+        """Lines inside continuation context should be instrumented."""
+        # When in_continuation=True, all lines are instrumented
+        # (they're part of a multi-line command)
+        assert should_instrument_line("    , absorb(id)", in_continuation=True)
+        assert should_instrument_line("    vce(cluster id)", in_continuation=True)
+        # Even comment-like content is instrumented in continuation
+        assert should_instrument_line("    /// comment", in_continuation=True)
 
 
 class TestInstrumentFile:
@@ -221,3 +232,116 @@ end
             assert 2 not in total_lines  # program define
             assert 3 not in total_lines  # version
             assert 7 not in total_lines  # end
+
+
+class TestContinuationLines:
+    """Tests for Stata continuation line (///) handling.
+
+    In Stata, /// at the end of a line continues the command to the next line.
+    All lines of a multi-line command should be instrumented for coverage.
+    """
+
+    def test_ends_with_continuation_basic(self):
+        """Test _ends_with_continuation detects /// at end of line."""
+        assert _ends_with_continuation("reghdfe y x ///")
+        assert _ends_with_continuation("    , absorb(id) ///")
+        assert not _ends_with_continuation("reghdfe y x")
+        assert not _ends_with_continuation("// comment with /// inside")
+
+    def test_ends_with_continuation_whitespace(self):
+        """Test _ends_with_continuation handles trailing whitespace."""
+        # Trailing whitespace after /// should still be detected
+        assert _ends_with_continuation("reghdfe y x ///  ")
+        assert _ends_with_continuation("reghdfe y x ///\t")
+
+    def test_instrument_file_continuation_all_lines(self):
+        """Test that all lines in a continuation are instrumented."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmppath = Path(tmpdir)
+
+            # Stata command spanning 3 lines with ///
+            source_content = """\
+program define test_regression
+    version 16
+    reghdfe y x ///
+        , absorb(id) ///
+        vce(cluster id)
+    display "done"
+end
+"""
+            source_path = tmppath / "test_regression.ado"
+            source_path.write_text(source_content)
+
+            dest_path = tmppath / "instrumented" / "test_regression.ado"
+            line_map = instrument_file(source_path, dest_path)
+
+            instrumented = dest_path.read_text()
+
+            # Line 3 (reghdfe y x ///) - starts the command
+            assert "{* COV:test_regression.ado:3 }" in instrumented
+            # Line 4 (, absorb(id) ///) - continuation
+            assert "{* COV:test_regression.ado:4 }" in instrumented
+            # Line 5 (vce(cluster id)) - final line of continuation
+            assert "{* COV:test_regression.ado:5 }" in instrumented
+            # Line 6 (display "done") - next command
+            assert "{* COV:test_regression.ado:6 }" in instrumented
+
+            # All 4 lines should be in the line map
+            assert 3 in line_map.values()
+            assert 4 in line_map.values()
+            assert 5 in line_map.values()
+            assert 6 in line_map.values()
+
+    def test_get_total_lines_continuation(self):
+        """Test that get_total_lines includes all continuation lines."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmppath = Path(tmpdir)
+
+            source_content = """\
+program define mytest
+    version 16
+    reghdfe y x ///
+        , absorb(id) ///
+        vce(cluster id)
+end
+"""
+            source_path = tmppath / "mytest.ado"
+            source_path.write_text(source_content)
+
+            total_lines = get_total_lines(source_path)
+
+            # Lines 3, 4, 5 should all be instrumentable
+            assert 3 in total_lines  # reghdfe y x ///
+            assert 4 in total_lines  # , absorb(id) ///
+            assert 5 in total_lines  # vce(cluster id)
+
+    def test_multiple_continuation_blocks(self):
+        """Test multiple separate continuation blocks in one file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmppath = Path(tmpdir)
+
+            source_content = """\
+program define mytest
+    version 16
+    * First multi-line command
+    gen x = 1 + ///
+        2 + ///
+        3
+    * Second multi-line command
+    gen y = 4 + ///
+        5
+end
+"""
+            source_path = tmppath / "mytest.ado"
+            source_path.write_text(source_content)
+
+            total_lines = get_total_lines(source_path)
+
+            # First block: lines 4, 5, 6
+            assert 4 in total_lines
+            assert 5 in total_lines
+            assert 6 in total_lines
+
+            # Second block: lines 8, 9
+            assert 8 in total_lines
+            assert 9 in total_lines
