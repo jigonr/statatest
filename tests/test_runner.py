@@ -88,8 +88,11 @@ class TestCreateWrapperDo:
         )
 
         # Instrumented dir should be added first with coverage comment
+        # Uses adopath ++ (double plus) to prepend with highest priority
         assert "// Instrumented source files for coverage" in wrapper
-        assert 'adopath + "/project/.statatest/instrumented"' in wrapper
+        assert 'adopath ++ "/project/.statatest/instrumented"' in wrapper
+        # discard clears cached programs to force reload from instrumented path
+        assert "discard" in wrapper
 
         # And should appear before other ado paths
         instr_pos = wrapper.find("instrumented")

@@ -132,13 +132,22 @@ def _prepare_environment(
     ado_paths = _get_ado_paths()
     conftest_files = discover_conftest(test.path.parent)
 
+    # Create log file first (needed for wrapper when coverage is enabled)
+    log_suffix = ".smcl" if coverage else ".log"
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=log_suffix, delete=False
+    ) as log_file:
+        log_path = Path(log_file.name)
+
     # Use relative path for test file (we run from test.path.parent)
+    # Pass log_path when coverage is enabled so wrapper uses `log using`
     wrapper_content = create_wrapper_do(
         test_path=Path(test.path.name),
         ado_paths=ado_paths,
         conftest_files=conftest_files,
         instrumented_dir=instrumented_dir,
         setup_do=config.setup_do,
+        log_path=log_path if coverage else None,
     )
 
     with tempfile.NamedTemporaryFile(
@@ -146,12 +155,6 @@ def _prepare_environment(
     ) as wrapper_file:
         wrapper_file.write(wrapper_content)
         wrapper_path = Path(wrapper_file.name)
-
-    log_suffix = ".smcl" if coverage else ".log"
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=log_suffix, delete=False
-    ) as log_file:
-        log_path = Path(log_file.name)
 
     return TestEnvironment(wrapper_path=wrapper_path, log_path=log_path)
 
@@ -180,13 +183,13 @@ def _execute_stata(
     start_time = time.time()
     log_flag = "-s" if coverage else "-b"
 
-    # Stata usage: stata-mp [-h -q -s -b] ["stata command"]
-    # The command should be a single quoted argument
+    # Stata usage: stata-mp [-h -q -s -b] [filename.do]
+    # With -b or -s flags, pass the do-file path directly (not "do filename")
     cmd = [
         config.stata_executable,
         log_flag,
         "-q",
-        f"do {env.wrapper_path}",
+        str(env.wrapper_path),
     ]
 
     process = subprocess.run(  # noqa: S603
