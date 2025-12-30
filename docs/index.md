@@ -21,14 +21,14 @@
 ## Quick Start
 
 ```bash
-# Install
-pip install statatest
+# Install with uv (recommended)
+uv tool install statatest
 
-# Run tests
-statatest tests/
+# Or run directly without installing
+uvx statatest tests/
 
 # Run with coverage
-statatest tests/ --coverage --cov-report=lcov
+uvx statatest tests/ --coverage --cov-report=lcov
 ```
 
 ## Example Test

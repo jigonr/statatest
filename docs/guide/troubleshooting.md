@@ -17,14 +17,11 @@ bash: statatest: command not found
 1. **Ensure pip/uv installed to PATH:**
 
    ```bash
-   # Check if installed
-   pip show statatest
-
-   # Reinstall with pip
-   pip install --user statatest
-
-   # Or use uv
+   # Install with uv (recommended)
    uv tool install statatest
+
+   # Or reinstall with pip
+   pip install --user statatest
    ```
 
 2. **Add Python user bin to PATH:**
@@ -410,7 +407,8 @@ Error: Fixture 'sample_data' not found
 2. **Missing dependencies:**
 
    ```yaml
-   - run: pip install statatest
+   - uses: astral-sh/setup-uv@v5
+   - run: uvx statatest tests/
    ```
 
 3. **Stata license not set:**

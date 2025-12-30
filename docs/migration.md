@@ -185,6 +185,10 @@ statatest tests/
 ### Step 1: Install statatest
 
 ```bash
+# Using uv (recommended)
+uv tool install statatest
+
+# Or using pip
 pip install statatest
 ```
 
@@ -227,8 +231,8 @@ statatest tests/ --coverage --cov-report=lcov
 
 ```yaml
 # .github/workflows/tests.yml
-- run: pip install statatest
-- run: statatest tests/ --junit-xml=junit.xml --coverage --cov-report=lcov
+- uses: astral-sh/setup-uv@v5
+- run: uvx statatest tests/ --junit-xml=junit.xml --coverage --cov-report=lcov
 ```
 
 ## Compatibility

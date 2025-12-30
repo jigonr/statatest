@@ -159,11 +159,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install statatest
-      - run: statatest tests/ --junit-xml=junit.xml --coverage --cov-report=lcov
+      - uses: astral-sh/setup-uv@v5
+      - run:
+          uvx statatest tests/ --junit-xml=junit.xml --coverage
+          --cov-report=lcov
       - uses: codecov/codecov-action@v5
         with:
           files: coverage.lcov

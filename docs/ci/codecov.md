@@ -93,12 +93,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install statatest
-        run: pip install statatest
+        uses: astral-sh/setup-uv@v5
 
       - name: Set up Stata license
         run: |
@@ -106,7 +101,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          statatest tests/ \
+          uvx statatest tests/ \
             --coverage \
             --cov-report=lcov \
             --junit-xml=junit.xml
@@ -145,11 +140,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install statatest
-          command: pip install statatest
+          name: Install uv
+          command: curl -LsSf https://astral.sh/uv/install.sh | sh
       - run:
           name: Run tests with coverage
-          command: statatest tests/ --coverage --cov-report=lcov
+          command: uvx statatest tests/ --coverage --cov-report=lcov
       - codecov/upload:
           file: coverage.lcov
 

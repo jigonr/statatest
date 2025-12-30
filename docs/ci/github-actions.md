@@ -23,20 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install statatest
-        run: pip install statatest
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Set up Stata license
         run: |
           echo "${{ secrets.STATA_LIC_B64 }}" | base64 -d > /usr/local/stata/stata.lic
 
       - name: Run tests
-        run: statatest tests/ --junit-xml=junit.xml
+        run: uvx statatest tests/ --junit-xml=junit.xml
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -68,12 +63,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install statatest
-        run: pip install statatest
+        uses: astral-sh/setup-uv@v5
 
       - name: Set up Stata license
         run: |
@@ -81,7 +71,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          statatest tests/ \
+          uvx statatest tests/ \
             --coverage \
             --cov-report=lcov \
             --junit-xml=junit.xml
