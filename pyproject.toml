@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "statatest"
-version = "0.1.1"
+version = "0.1.0"
 description = "Pytest-inspired testing and code coverage framework for Stata"
 readme = "README.md"
 license = "MIT"
