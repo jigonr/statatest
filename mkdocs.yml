@@ -59,6 +59,7 @@ nav:
       - Fixtures: reference/fixtures.md
   - Contributing: contributing.md
   - Changelog: changelog.md
+  - Migration: migration.md
 
 markdown_extensions:
   - pymdownx.highlight:
