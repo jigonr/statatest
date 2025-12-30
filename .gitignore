@@ -76,3 +76,4 @@ site/
 
 # Letta/Claude agents
 .letta/
+node_modules/
