@@ -4,17 +4,20 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/statatest.svg)](https://pypi.org/project/statatest/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/jigonr/statatest/actions/workflows/ci.yml/badge.svg)](https://github.com/jigonr/statatest/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/jigonr/statatest/branch/main/graph/badge.svg)](https://codecov.io/gh/jigonr/statatest)
-[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://jigonr.github.io/statatest/)
+[![codecov](https://codecov.io/gh/jigonr/statatest/branch/main/graph/badge.svg?token=BG2IGYM5BE)](https://codecov.io/gh/jigonr/statatest)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://jigonzalez.com/statatest/)
 
 A pytest-inspired testing and code coverage framework for Stata.
 
-**[Documentation](https://jigonr.github.io/statatest/)** | **[GitHub](https://github.com/jigonr/statatest)** | **[PyPI](https://pypi.org/project/statatest/)**
+**[Documentation](https://jigonzalez.com/statatest/)** |
+**[GitHub](https://github.com/jigonr/statatest)** |
+**[PyPI](https://pypi.org/project/statatest/)**
 
 ## Features
 
 - **Test Discovery**: Automatically find and run `test_*.do` files
-- **Rich Assertions**: Built on Stata's native `assert` with detailed failure messages
+- **Rich Assertions**: Built on Stata's native `assert` with detailed failure
+  messages
 - **Fixture System**: Reusable setup/teardown with pytest-like scoping
 - **Code Coverage**: Line-level coverage via SMCL comment instrumentation
 - **CI Integration**: JUnit XML output for GitHub Actions, LCOV for Codecov
@@ -74,14 +77,14 @@ end
 
 ## Assertions
 
-| Function | Purpose | Example |
-|----------|---------|---------|
-| `assert_equal` | Value equality | `assert_equal "\`r(mean)'"", expected("5")` |
-| `assert_true` | Boolean true | `assert_true _N > 0` |
-| `assert_false` | Boolean false | `assert_false missing(x)` |
-| `assert_error` | Command should fail | `assert_error "invalid_command"` |
-| `assert_var_exists` | Variable exists | `assert_var_exists myvar` |
-| `assert_approx_equal` | Float comparison | `assert_approx_equal r(mean), expected(0.5) tol(0.01)` |
+| Function              | Purpose             | Example                                                |
+| --------------------- | ------------------- | ------------------------------------------------------ |
+| `assert_equal`        | Value equality      | `assert_equal "\`r(mean)'"", expected("5")`            |
+| `assert_true`         | Boolean true        | `assert_true _N > 0`                                   |
+| `assert_false`        | Boolean false       | `assert_false missing(x)`                              |
+| `assert_error`        | Command should fail | `assert_error "invalid_command"`                       |
+| `assert_var_exists`   | Variable exists     | `assert_var_exists myvar`                              |
+| `assert_approx_equal` | Float comparison    | `assert_approx_equal r(mean), expected(0.5) tol(0.01)` |
 
 ## Fixtures
 
@@ -119,11 +122,11 @@ end
 
 Built-in fixtures:
 
-| Fixture | Purpose |
-|---------|---------|
-| `fixture_tempfile` | Temporary file path (`$fixture_tempfile_path`) |
-| `fixture_empty_dataset` | Empty dataset with optional obs count |
-| `fixture_seed` | Reproducible random seed |
+| Fixture                 | Purpose                                        |
+| ----------------------- | ---------------------------------------------- |
+| `fixture_tempfile`      | Temporary file path (`$fixture_tempfile_path`) |
+| `fixture_empty_dataset` | Empty dataset with optional obs count          |
+| `fixture_seed`          | Reproducible random seed                       |
 
 ## Configuration
 
@@ -158,7 +161,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - run: pip install statatest
       - run: statatest tests/ --junit-xml=junit.xml --coverage --cov-report=lcov
       - uses: codecov/codecov-action@v5
@@ -178,4 +181,5 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Acknowledgments
 
 - Inspired by [pytest](https://pytest.org/)
-- SMCL parsing patterns adapted from [mcp-stata](https://github.com/tmonk/mcp-stata) (AGPL-3.0)
+- SMCL parsing patterns adapted from
+  [mcp-stata](https://github.com/tmonk/mcp-stata) (AGPL-3.0)
