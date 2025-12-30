@@ -134,7 +134,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `rich` dependency (replaced with standard library for reduced dependencies)
 - `[econ]` optional extra (all features now included by default)
 - `adopath_mode` configuration option (simplified configuration)
-- Release-please automation (in favor of manual releases)
 - Outdated adopath settings comment in executor
 
 [Unreleased]: https://github.com/jigonr/statatest/compare/v0.1.0...HEAD
