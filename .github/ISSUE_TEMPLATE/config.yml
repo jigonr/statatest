@@ -1,0 +1,9 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://jigonzalez.com/statatest/
+    about: Check the documentation for usage examples and API reference.
+  - name: Discussions
+    url: https://github.com/jigonr/statatest/discussions
+    about: Ask questions and discuss ideas with the community.

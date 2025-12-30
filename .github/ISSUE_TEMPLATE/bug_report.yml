@@ -1,0 +1,65 @@
+---
+name: Bug Report
+description: Report a bug in statatest
+labels:
+  - bug
+  - triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal code to reproduce the behavior.
+      placeholder: |
+        1. Create test file `test_example.do`
+        2. Run `statatest tests/`
+        3. See error...
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+
+  - type: input
+    id: statatest-version
+    attributes:
+      label: statatest version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: stata-version
+    attributes:
+      label: Stata version
+      placeholder: "Stata/MP 18.5"
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - macOS
+        - Linux
+        - Windows
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant output.
+      render: shell

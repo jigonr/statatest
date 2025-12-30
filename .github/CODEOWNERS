@@ -1,0 +1,12 @@
+# Default owners for everything
+* @jigonr
+
+# Documentation
+docs/ @jigonr
+*.md @jigonr
+
+# CI/CD
+.github/ @jigonr
+
+# Core package
+src/statatest/ @jigonr
