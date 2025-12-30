@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.1.1 (2025-12-30)
+
+## What's Changed
+* feat(fixtures): add pytest-like fixture system by @jigonr in https://github.com/jigonr/statatest/pull/1
+* chore(ci): add release-please for automatic changelog by @jigonr in https://github.com/jigonr/statatest/pull/2
+* feat(coverage): add instrumentation and pre-commit hooks by @jigonr in https://github.com/jigonr/statatest/pull/3
+* docs: add MkDocs documentation website by @jigonr in https://github.com/jigonr/statatest/pull/4
+* docs: remove project-specific references from documentation by @jigonr in https://github.com/jigonr/statatest/pull/5
+* docs(codecov): expand integration guide with multi-CI support by @jigonr in https://github.com/jigonr/statatest/pull/9
+* docs: add comprehensive troubleshooting guide by @jigonr in https://github.com/jigonr/statatest/pull/10
+* ci: add scheduled Stata integration tests by @jigonr in https://github.com/jigonr/statatest/pull/11
+* feat(econ): add economic fixtures and assertions as optional extra by @jigonr in https://github.com/jigonr/statatest/pull/12
+* fix(econ): correct network terminology and add AKM bipartite fixture by @jigonr in https://github.com/jigonr/statatest/pull/13
+* feat(econ): add panel fixtures and economic assertions by @jigonr in https://github.com/jigonr/statatest/pull/14
+* docs: add econ extension documentation and update CHANGELOG by @jigonr in https://github.com/jigonr/statatest/pull/15
+* chore: remove release-please in favor of manual releases by @jigonr in https://github.com/jigonr/statatest/pull/17
+* fix(coverage): wire up instrumentation in CLI by @jigonr in https://github.com/jigonr/statatest/pull/22
+* test: improve Python test coverage to 90%+ by @jigonr in https://github.com/jigonr/statatest/pull/24
+* docs: add Docker integration guide by @jigonr in https://github.com/jigonr/statatest/pull/25
+* feat: add GitHub Action for zero-install testing by @jigonr in https://github.com/jigonr/statatest/pull/26
+* refactor: code quality improvements (constants, logging, econ merge) by @jigonr in https://github.com/jigonr/statatest/pull/30
+* refactor(config): replace lambdas with __post_init__ by @jigonr in https://github.com/jigonr/statatest/pull/44
+* refactor(fixtures): move fixtures.py to fixtures/ module by @jigonr in https://github.com/jigonr/statatest/pull/45
+* refactor(coverage): move instrument.py to coverage/ module by @jigonr in https://github.com/jigonr/statatest/pull/46
+* refactor(fixtures): rename fixture_production_network to fixture_directed_network by @jigonr in https://github.com/jigonr/statatest/pull/47
+* refactor(config): OOP redesign with classmethod factory + remove adopath_mode by @jigonr in https://github.com/jigonr/statatest/pull/48
+* docs(executor): remove outdated adopath settings comment by @jigonr in https://github.com/jigonr/statatest/pull/49
+* fix(executor): improve Stata invocation to match documented usage by @jigonr in https://github.com/jigonr/statatest/pull/50
+* fix(coverage): fix instrumentation to capture COV markers by @jigonr in https://github.com/jigonr/statatest/pull/52
+* feat(assertions): add assert_count, assert_var_type, assert_label_exists by @jigonr in https://github.com/jigonr/statatest/pull/53
+* feat(ado): add verbose option to all assertions and fixtures by @jigonr in https://github.com/jigonr/statatest/pull/54
+* docs: comprehensive documentation update by @jigonr in https://github.com/jigonr/statatest/pull/55
+* release: prepare v0.1.0 infrastructure by @jigonr in https://github.com/jigonr/statatest/pull/57
+* ci(deps): bump actions/download-artifact from 4 to 7 by @dependabot[bot] in https://github.com/jigonr/statatest/pull/62
+* ci(deps): bump astral-sh/setup-uv from 4 to 7 by @dependabot[bot] in https://github.com/jigonr/statatest/pull/61
+* ci(deps): bump actions/upload-pages-artifact from 3 to 4 by @dependabot[bot] in https://github.com/jigonr/statatest/pull/60
+* ci(deps): bump actions/setup-python from 5 to 6 by @dependabot[bot] in https://github.com/jigonr/statatest/pull/59
+* ci(deps): bump DavidAnson/markdownlint-cli2-action from 18 to 22 by @dependabot[bot] in https://github.com/jigonr/statatest/pull/58
+* chore(main): release 0.1.1 by @github-actions[bot] in https://github.com/jigonr/statatest/pull/63
+
+## New Contributors
+* @jigonr made their first contribution in https://github.com/jigonr/statatest/pull/1
+* @dependabot[bot] made their first contribution in https://github.com/jigonr/statatest/pull/62
+* @github-actions[bot] made their first contribution in https://github.com/jigonr/statatest/pull/63
+
+**Full Changelog**: https://github.com/jigonr/statatest/compare/v0.1.0...v0.1.1
+
 ## [Unreleased]
 
 ## [0.1.0] - 2025-12-30
