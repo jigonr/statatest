@@ -13,7 +13,6 @@ permissions:
 
 jobs:
   release-please:
-    needs: validate-changelog
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
