@@ -12,23 +12,6 @@ permissions:
   id-token: write
 
 jobs:
-  validate-changelog:
-    name: Validate Changelog
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Validate changelog format
-        uses: tomtom-international/keepachangelog-action@v2
-        with:
-          token: ${{ github.token }}
-
   release-please:
     needs: validate-changelog
     runs-on: ubuntu-latest
