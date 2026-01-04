@@ -69,7 +69,9 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@v22
         with:
           config: .markdownlint.json
-          globs: "**/*.md"
+          globs: |
+            **/*.md
+            !CHANGELOG.md
 
   actions:
     name: GitHub Actions (actionlint)

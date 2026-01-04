@@ -1,6 +1,11 @@
 ---
 extends: default
 
+# Ignore Claude workflow files (managed by anthropics, can't modify)
+ignore:
+  - .github/workflows/claude.yml
+  - .github/workflows/claude-code-review.yml
+
 rules:
   line-length:
     max: 120
