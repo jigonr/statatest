@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2](https://github.com/jigonr/statatest/compare/statatest-v0.1.1...statatest-v0.1.2) (2026-01-04)
+
+
+### Bug Fixes
+
+* **ci:** correct statatest CLI argument order ([f5ddcdc](https://github.com/jigonr/statatest/commit/f5ddcdca712d06dfac8b579e1e1f4ea2865417ce))
+* **ci:** resolve integration test failures in Stata container ([#74](https://github.com/jigonr/statatest/issues/74)) ([8fc1592](https://github.com/jigonr/statatest/commit/8fc1592fc476b74cc51ccc260a213698e158eb80))
+* **ci:** use uv run for statatest and install deps before tests ([1d3edc0](https://github.com/jigonr/statatest/commit/1d3edc0a636898a73ff96b0b9d6b03e4ee696ebf))
+
 ## [0.1.1](https://github.com/jigonr/statatest/compare/statatest-v0.1.0...statatest-v0.1.1) (2025-12-31)
 
 
