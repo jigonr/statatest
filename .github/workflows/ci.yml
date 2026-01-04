@@ -99,7 +99,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Install statatest
-        run: uv pip install -e .
+        run: uv sync --extra dev
 
       - name: Run Stata tests
         run: |
@@ -108,6 +108,9 @@ jobs:
             -j junit-stata.xml \
             -c \
             -r lcov
+
+      - name: Install codecov dependencies
+        run: apt-get update && apt-get install -y curl gpg
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
