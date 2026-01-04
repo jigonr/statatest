@@ -106,11 +106,12 @@ jobs:
 
       - name: Run Stata tests
         run: |
-          uv run statatest tests/stata/ \
+          uv run statatest \
             -v \
-            -j junit-stata.xml \
             -c \
-            -r lcov
+            -r lcov \
+            -j junit-stata.xml \
+            tests/stata/
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
