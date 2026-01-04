@@ -101,16 +101,16 @@ jobs:
       - name: Install statatest
         run: uv sync --extra dev
 
+      - name: Install codecov dependencies
+        run: apt-get update && apt-get install -y curl gpg
+
       - name: Run Stata tests
         run: |
-          statatest tests/stata/ \
+          uv run statatest tests/stata/ \
             -v \
             -j junit-stata.xml \
             -c \
             -r lcov
-
-      - name: Install codecov dependencies
-        run: apt-get update && apt-get install -y curl gpg
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
