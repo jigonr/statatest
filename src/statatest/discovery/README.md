@@ -20,8 +20,8 @@ tests = discover_tests(Path("tests/"))
 # With filters
 tests = discover_tests(
     Path("tests/"),
-    marker="unit",           # Only tests with @unit marker
-    keyword="coverage"       # Only tests matching keyword
+    marker="unit",  # Only tests with @unit marker
+    keyword="coverage",  # Only tests matching keyword
 )
 
 for test in tests:

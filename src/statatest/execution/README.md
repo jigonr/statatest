@@ -17,10 +17,7 @@ Run Stata tests and parse results.
 from statatest.execution import run_tests
 
 results = run_tests(
-    test_files=[test1, test2],
-    config=config,
-    coverage=True,
-    verbose=True
+    test_files=[test1, test2], config=config, coverage=True, verbose=True
 )
 
 for result in results:

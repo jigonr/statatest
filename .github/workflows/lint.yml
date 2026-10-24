@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   python:
-    name: Python (ruff + mypy)
+    name: Python (Ruff + mypy + ty)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,7 +29,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv sync --locked --extra dev
 
       - name: Run ruff check
         run: uv run ruff check .
@@ -39,6 +39,9 @@ jobs:
 
       - name: Run mypy
         run: uv run mypy src/statatest --strict
+
+      - name: Run ty
+        run: uv run ty check src/statatest
 
   yaml:
     name: YAML (yamllint)

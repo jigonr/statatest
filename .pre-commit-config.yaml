@@ -7,7 +7,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-added-large-files
-        args: ['--maxkb=500']
+        args: ["--maxkb=500"]
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: trailing-whitespace
@@ -20,21 +20,31 @@ repos:
       - id: check-docstring-first
       - id: debug-statements
       - id: name-tests-test
-        args: ['--pytest-test-first']
+        args: ["--pytest-test-first"]
 
-  # Python code formatting and linting with ruff (faster than black/isort/flake8)
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.6
+  # Resolve Ruff and ty from the project's development lockfile.
+  - repo: local
     hooks:
       - id: ruff
         name: 🐍 Lint Python code with ruff
-        args: ['--fix', '--exit-non-zero-on-fix']
+        entry: uv run --locked --extra dev ruff check
+        language: system
+        args: ["--fix", "--exit-non-zero-on-fix"]
         types_or: [python, pyi]
         stages: [pre-commit]
       - id: ruff-format
         name: 🐍 Format Python code with ruff
+        entry: uv run --locked --extra dev ruff format
+        language: system
         types_or: [python, pyi]
         stages: [pre-commit]
+      - id: ty
+        name: Check Python types with ty
+        entry: uv run --locked --extra dev ty check src/statatest
+        language: system
+        types_or: [python, pyi]
+        pass_filenames: false
+        stages: [pre-push, manual]
 
   # Type checking with mypy (runs on push only)
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -42,9 +52,9 @@ repos:
     hooks:
       - id: mypy
         name: 🐍 Check Python types with mypy
-        args: ['--strict']
-        additional_dependencies: ['click']
-        files: '^src/statatest/'
+        args: ["--strict"]
+        additional_dependencies: ["click"]
+        files: "^src/statatest/"
         stages: [pre-push, manual]
 
   # Spell checking
@@ -53,7 +63,7 @@ repos:
     hooks:
       - id: codespell
         name: 📖 Check spelling with codespell
-        args: ['--skip', '*.ado,*.smcl']
+        args: ["--skip", "*.ado,*.smcl"]
         stages: [pre-commit]
 
   # Security scanning with bandit
@@ -62,8 +72,8 @@ repos:
     hooks:
       - id: bandit
         name: 🔒 Security check with bandit
-        args: ['-c', 'pyproject.toml']
-        additional_dependencies: ['bandit[toml]']
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
         stages: [pre-push, manual]
 
   # Markdown formatting with prettier
@@ -73,7 +83,7 @@ repos:
       - id: prettier
         name: 📝 Format Markdown with prettier
         types: [markdown]
-        args: ['--prose-wrap', 'always', '--print-width', '80']
+        args: ["--prose-wrap", "always", "--print-width", "80"]
         stages: [pre-commit]
 
   # Markdown linting (check only, runs on push)
@@ -82,7 +92,7 @@ repos:
     hooks:
       - id: markdownlint
         name: 📝 Lint Markdown formatting
-        args: ['--config', '.markdownlint.json']
+        args: ["--config", ".markdownlint.json"]
         stages: [pre-push, manual]
 
   # Stata .ado file checks (custom)

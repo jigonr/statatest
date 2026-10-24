@@ -21,8 +21,8 @@ Represents a discovered test file:
 @dataclass
 class TestFile:
     path: Path
-    markers: list[str]      # e.g., ["unit", "slow"]
-    programs: list[str]     # Test program names
+    markers: list[str]  # e.g., ["unit", "slow"]
+    programs: list[str]  # Test program names
 ```
 
 ### TestResult
@@ -35,7 +35,7 @@ class TestResult:
     test_file: str
     passed: bool
     duration: float
-    rc: int                 # Stata return code
+    rc: int  # Stata return code
     stdout: str
     stderr: str
     error_message: str
@@ -50,8 +50,8 @@ Load from `statatest.toml` or `pyproject.toml`:
 from statatest.core import Config
 
 config = Config.from_project(Path("."))
-print(config.stata_path)    # Path to Stata executable
-print(config.timeout)       # Test timeout in seconds
+print(config.stata_path)  # Path to Stata executable
+print(config.timeout)  # Test timeout in seconds
 ```
 
 ## Dependencies
